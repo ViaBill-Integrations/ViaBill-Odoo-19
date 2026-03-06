@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Default ViaBill payment provider record.
+        Created on module installation via post_init_hook → setup_provider().
+        noupdate="1" prevents overwriting user-configured values on module upgrade.
+    -->
+    <record id="payment_provider_viabill" model="payment.provider">
+        <field name="name">ViaBill</field>
+        <field name="code">viabill</field>
+        <field name="state">test</field>
+        <field name="is_published" eval="False"/>
+        <field name="allow_tokenization" eval="False"/>
+        <field name="capture_manually" eval="False"/>
+        <field name="payment_method_ids" eval="[Command.set([ref('payment_method_viabill')])]"/>
+    </record>
+
+</odoo>

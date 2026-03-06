@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="payment_method_viabill" model="payment.method">
+            <field name="name">ViaBill</field>
+            <field name="code">viabill</field>
+            <field name="image" type="base64" file="payment_viabill/static/files/viabill_logo.png"/>
+        </record>
+    </data>
+</odoo>

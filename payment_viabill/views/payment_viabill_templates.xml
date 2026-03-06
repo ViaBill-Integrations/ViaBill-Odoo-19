@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Redirect form template for ViaBill checkout.
+
+        This template renders a hidden HTML form. The JS intercepts the submit,
+        serializes the fields, and POSTs them to the local Odoo proxy endpoint
+        (/payment/viabill/checkout). The proxy then forwards a JSON request to
+        ViaBill's checkout-authorize API and returns the redirect URL to the
+        browser, which then redirects the customer to the ViaBill gateway.
+    -->
+    <template id="redirect_form" name="ViaBill: Redirect Form">
+        <form
+            id="o_viabill_redirect_form"
+            name="o_payment_redirect_form"
+            t-att-action="checkout_url"
+            method="post"
+            class="o_viabill_redirect_form"
+        >
+            <input type="hidden" name="protocol"     t-att-value="protocol"/>
+            <input type="hidden" name="apikey"       t-att-value="apikey"/>
+            <input type="hidden" name="transaction"  t-att-value="transaction"/>
+            <input type="hidden" name="order_number" t-att-value="order_number"/>
+            <input type="hidden" name="amount"       t-att-value="amount"/>
+            <input type="hidden" name="currency"     t-att-value="currency"/>
+            <input type="hidden" name="success_url"  t-att-value="success_url"/>
+            <input type="hidden" name="cancel_url"   t-att-value="cancel_url"/>
+            <input type="hidden" name="callback_url" t-att-value="callback_url"/>
+            <input type="hidden" name="md5check"     t-att-value="md5check"/>
+            <input type="hidden" name="test"         t-att-value="test"/>
+
+            <button type="submit" class="btn btn-primary o_viabill_submit_btn">
+                Pay with ViaBill
+            </button>
+        </form>
+    </template>
+
+    <!--
+        ViaBill PriceTags — global config element + custom CSS/JS injection.
+
+        Injected at the end of #wrapwrap on every frontend page when a non-disabled
+        ViaBill provider with a PriceTag script exists.
+
+        Emits:
+          1. A hidden <div id="o_viabill_pricetag_config"> with all config as
+             data attributes (read by viabill_pricetags.js).
+          2. A <style> block with the custom CSS (if set).
+          3. A <script> block with the custom JS (if set), deferred to run after
+             the page has loaded.
+
+        Country resolution:
+          - viabill_pricetag_country (non-empty) → use directly
+          - otherwise → company country code (lowercase)
+
+        Language resolution:
+          - viabill_pricetag_language (non-empty) → use directly
+          - otherwise → first two chars of request.lang.code (e.g. 'en')
+    -->
+    <template
+        id="pricetag_assets"
+        name="ViaBill: PriceTags Global Config"
+        inherit_id="website.layout"
+        active="True"
+    >
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <t t-set="viabill_provider" t-value="request.env['payment.provider'].sudo().search(
+                [('code', '=', 'viabill'), ('state', '!=', 'disabled')], limit=1
+            )"/>
+            <t t-if="viabill_provider and viabill_provider.viabill_pricetag_script">
+                <t t-set="website_obj"       t-value="request.env['website'].get_current_website()"/>
+                <t t-set="company_obj"       t-value="website_obj.company_id"/>
+                <t t-set="currency_code"     t-value="(company_obj.currency_id.name or 'EUR').lower()"/>
+                <t t-set="country_override"  t-value="viabill_provider.viabill_pricetag_country or ''"/>
+                <t t-set="country_code"      t-value="country_override if country_override else (company_obj.country_id.code or 'DK').lower()"/>
+                <t t-set="lang_override"     t-value="viabill_provider.viabill_pricetag_language or ''"/>
+                <t t-set="lang_code"         t-value="lang_override if lang_override else (request.lang.code or 'en_US')[:2].lower()"/>
+                <t t-set="custom_css"        t-value="viabill_provider.viabill_pricetag_custom_css or ''"/>
+                <t t-set="custom_js"         t-value="viabill_provider.viabill_pricetag_custom_js or ''"/>
+
+                <!-- Config element read by viabill_pricetags.js -->
+                <div
+                    id="o_viabill_pricetag_config"
+                    style="display:none;"
+                    t-att-data-script-tag="viabill_provider.viabill_pricetag_script"
+                    t-att-data-enable-product="'1' if viabill_provider.viabill_pricetag_product else '0'"
+                    t-att-data-enable-cart="'1' if viabill_provider.viabill_pricetag_cart else '0'"
+                    t-att-data-enable-checkout="'1' if viabill_provider.viabill_pricetag_checkout else '0'"
+                    t-att-data-currency="currency_code"
+                    t-att-data-country-code="country_code"
+                    t-att-data-language="lang_code"
+                />
+
+                <!-- Custom CSS injection -->
+                <t t-if="custom_css">
+                    <style type="text/css" t-out="custom_css"/>
+                </t>
+
+                <!-- Custom JS injection (deferred) -->
+                <t t-if="custom_js">
+                    <script type="text/javascript">
+                        document.addEventListener('DOMContentLoaded', function() {
+                            <t t-out="custom_js"/>
+                        });
+                    </script>
+                </t>
+
+            </t>
+        </xpath>
+    </template>
+
+    <!--
+        ViaBill PriceTag — Product Page.
+
+        Inherits website_sale.product_price and appends the pricetag placeholder
+        <div> immediately after the price block.
+
+        data-view="product" is set directly in the template.
+        data-dynamic-price=".oe_price" tells the ViaBill script to read the
+        current price from the .oe_price span, which updates automatically when
+        the customer selects a product variant.
+    -->
+    <template
+        id="pricetag_product"
+        name="ViaBill: PriceTag on Product Page"
+        inherit_id="website_sale.product_price"
+        active="True"
+    >
+        <xpath expr="//div[@name='product_price']" position="after">
+            <t t-set="viabill_provider" t-value="request.env['payment.provider'].sudo().search(
+                [('code', '=', 'viabill'), ('state', '!=', 'disabled')], limit=1
+            )"/>
+            <t t-if="viabill_provider
+                     and viabill_provider.viabill_pricetag_script
+                     and viabill_provider.viabill_pricetag_product">
+                <t t-set="website_obj"      t-value="request.env['website'].get_current_website()"/>
+                <t t-set="company_obj"      t-value="website_obj.company_id"/>
+                <t t-set="currency_code"    t-value="(company_obj.currency_id.name or 'EUR').lower()"/>
+                <t t-set="country_override" t-value="viabill_provider.viabill_pricetag_country or ''"/>
+                <t t-set="country_code"     t-value="country_override if country_override else (company_obj.country_id.code or 'DK').lower()"/>
+                <t t-set="lang_override"    t-value="viabill_provider.viabill_pricetag_language or ''"/>
+                <t t-set="lang_code"        t-value="lang_override if lang_override else (request.lang.code or 'en_US')[:2].lower()"/>
+                <t t-set="product_selector" t-value="viabill_provider.viabill_pricetag_product_selector or '.oe_price'"/>
+                <div class="viabill-pricetag-wrapper-product">
+                    <div
+                        class="viabill-pricetag"
+                        data-view="product"
+                        t-att-data-dynamic-price="product_selector"
+                        data-price-decimal-separator="."
+                        t-att-data-currency="currency_code"
+                        t-att-data-country-code="country_code"
+                        t-att-data-language="lang_code"
+                    />
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <!--
+        ViaBill PriceTag — Cart and Checkout Pages.
+
+        Inherits website_sale.total (rendered on both /shop/cart and
+        /shop/checkout). Uses request.httprequest.path to detect which page
+        is being rendered and emits ONLY the correct pricetag div:
+          - /shop/cart      → data-view="basket"  (if cart toggle is on)
+          - /shop/checkout  → data-view="payment" (if checkout toggle is on)
+    -->
+    <template
+        id="pricetag_cart_checkout"
+        name="ViaBill: PriceTag on Cart and Checkout Pages"
+        inherit_id="website_sale.total"
+        active="True"
+    >
+        <xpath expr="//tr[@name='o_order_total']" position="after">
+            <t t-set="viabill_provider" t-value="request.env['payment.provider'].sudo().search(
+                [('code', '=', 'viabill'), ('state', '!=', 'disabled')], limit=1
+            )"/>
+            <t t-if="viabill_provider and viabill_provider.viabill_pricetag_script">
+                <t t-set="current_path"     t-value="request.httprequest.path"/>
+                <t t-set="is_cart"          t-value="'/shop/cart' in current_path"/>
+                <t t-set="is_checkout"      t-value="'/shop/checkout' in current_path or '/shop/payment' in current_path"/>
+                <t t-set="website_obj"      t-value="request.env['website'].get_current_website()"/>
+                <t t-set="company_obj"      t-value="website_obj.company_id"/>
+                <t t-set="currency_code"    t-value="(company_obj.currency_id.name or 'EUR').lower()"/>
+                <t t-set="country_override" t-value="viabill_provider.viabill_pricetag_country or ''"/>
+                <t t-set="country_code"     t-value="country_override if country_override else (company_obj.country_id.code or 'DK').lower()"/>
+                <t t-set="lang_override"    t-value="viabill_provider.viabill_pricetag_language or ''"/>
+                <t t-set="lang_code"        t-value="lang_override if lang_override else (request.lang.code or 'en_US')[:2].lower()"/>
+                <t t-set="cart_selector"     t-value="viabill_provider.viabill_pricetag_cart_selector or 'strong.monetary_field'"/>
+                <t t-set="checkout_selector" t-value="viabill_provider.viabill_pricetag_checkout_selector or 'strong.monetary_field'"/>
+
+                <!-- Cart pricetag: only on /shop/cart and only if cart toggle is on -->
+                <t t-if="is_cart and viabill_provider.viabill_pricetag_cart">
+                    <tr name="o_viabill_pricetag_cart_row">
+                        <td colspan="3" class="border-0 p-0 pt-2">
+                            <div class="viabill-pricetag-wrapper-cart">
+                                <div
+                                    id="o_viabill_pricetag_cart"
+                                    class="viabill-pricetag"
+                                    data-view="basket"
+                                    t-att-data-dynamic-price="cart_selector"
+                                    data-price-decimal-separator="."
+                                    t-att-data-currency="currency_code"
+                                    t-att-data-country-code="country_code"
+                                    t-att-data-language="lang_code"
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                </t>
+
+                <!-- Checkout pricetag: only on /shop/checkout and only if checkout toggle is on -->
+                <t t-if="is_checkout and viabill_provider.viabill_pricetag_checkout">
+                    <tr name="o_viabill_pricetag_checkout_row">
+                        <td colspan="3" class="border-0 p-0 pt-2">
+                            <div class="viabill-pricetag-wrapper-checkout">
+                                <div
+                                    id="o_viabill_pricetag_checkout"
+                                    class="viabill-pricetag"
+                                    data-view="payment"
+                                    t-att-data-dynamic-price="checkout_selector"
+                                    data-price-decimal-separator="."
+                                    t-att-data-currency="currency_code"
+                                    t-att-data-country-code="country_code"
+                                    t-att-data-language="lang_code"
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                </t>
+
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

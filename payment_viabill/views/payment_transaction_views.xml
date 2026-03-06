@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the payment transaction form view to add a Refund button and display
+         the ViaBill transaction reference. -->
+    <record id="payment_transaction_form" model="ir.ui.view">
+        <field name="name">payment.transaction.form.viabill</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="arch" type="xml">
+            <!-- Add a "Refund Transaction" button in the header, visible only for done
+                 ViaBill transactions. This allows merchants to initiate a refund directly
+                 from the transaction form without navigating to a separate menu. -->
+            <xpath expr="//header/button[@name='action_void']" position="after">
+                <button
+                    type="object"
+                    name="action_refund"
+                    string="Refund Transaction"
+                    invisible="state != 'done' or provider_code != 'viabill'"
+                    confirm="Are you sure you want to refund this transaction? This action cannot be undone."
+                />
+            </xpath>
+            <xpath expr="//field[@name='provider_reference']" position="after">
+                <!-- The provider_reference field already stores the ViaBill transaction ID.
+                     This placeholder is kept for future ViaBill-specific fields. -->
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

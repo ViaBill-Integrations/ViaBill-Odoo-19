@@ -1,0 +1,400 @@
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-02-27 04:26-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: payment_viabill/models/sale_order.py:11
+msgid "Done ViaBill Transactions"
+msgstr "Gennemførte ViaBill-transaktioner"
+
+#: payment_viabill/models/sale_order.py:53
+msgid "There are no captured ViaBill transactions to refund."
+msgstr "Der er ingen registrerede ViaBill-transaktioner at refundere."
+
+#: payment_viabill/models/sale_order.py:57
+msgid "Refund ViaBill Transaction"
+msgstr "Refusion af ViaBill-transaktion"
+
+#: payment_viabill/models/payment_transaction.py:126
+#, python-format
+msgid "ViaBill API request failed: %s"
+msgstr "ViaBill API-anmodning mislykkedes: %s"
+
+#: payment_viabill/models/payment_transaction.py:154
+#, python-format
+msgid "ViaBill API error (HTTP %s): %s"
+msgstr "ViaBill API-fejl (HTTP %s): %s"
+
+#: payment_viabill/models/payment_transaction.py:238
+msgid ""
+"Cannot void this transaction: it has already been captured by ViaBill. "
+"Please use the Refund Transaction button instead."
+msgstr ""
+"Kan ikke annullere denne transaktion: den er allerede blevet fanget af "
+"ViaBill. Brug venligst knappen Refusionstransaktion i stedet."
+
+#: payment_viabill/models/payment_transaction.py:367
+msgid "Received ViaBill payment data with missing status."
+msgstr "Modtaget ViaBill betalingsdata med manglende status."
+
+#: payment_viabill/models/payment_transaction.py:397
+msgid "ViaBill reported a payment error."
+msgstr "ViaBill rapporterede en betalingsfejl."
+
+#: payment_viabill/models/payment_transaction.py:406
+#, python-format
+msgid "Received data with unknown ViaBill payment status: %s."
+msgstr "Modtagne data med ukendt ViaBill betalingsstatus: %s."
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:11
+msgid "ViaBill Refund Wizard"
+msgstr "ViaBill Refund Wizard"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:16
+msgid "Transaction"
+msgstr "Transaktion"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:26
+msgid "Captured Amount"
+msgstr "Optaget mængde"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:31
+msgid "Already Refunded"
+msgstr "Allerede refunderet"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:36
+msgid "Maximum Refund Allowed"
+msgstr "Maksimal refusion tilladt"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:41
+msgid "Amount to Refund"
+msgstr "Beløb til tilbagebetaling"
+
+#: payment_viabill/wizards/viabill_refund_wizard.py:108
+#, python-format
+msgid "The refund amount must be greater than zero and not exceed %(max)s."
+msgstr "Refusionsbeløbet skal være større end nul og ikke overstige %(max)s."
+
+#: payment_viabill/models/payment_provider.py:33
+msgid "API Key"
+msgstr "API nøgle"
+
+#: payment_viabill/models/payment_provider.py:34
+msgid "The API key provided by ViaBill for your merchant account."
+msgstr "API-nøglen leveret af ViaBill til din sælgerkonto."
+
+#: payment_viabill/models/payment_provider.py:38
+msgid "Secret Key"
+msgstr "Hemmelig nøgle"
+
+#: payment_viabill/models/payment_provider.py:39
+msgid "The secret key provided by ViaBill, used to sign API requests."
+msgstr ""
+"Den hemmelige nøgle leveret af ViaBill, bruges til at signere API-"
+"anmodninger."
+
+#: payment_viabill/models/payment_provider.py:44
+msgid "PriceTag Script"
+msgstr "PriceTag Script"
+
+#: payment_viabill/models/payment_provider.py:46
+msgid ""
+"The ViaBill PriceTag <script> tag returned by ViaBill on login/register. "
+"Paste the full <script>…</script> HTML as provided by ViaBill. This script "
+"is injected into every frontend page to enable the PriceTag widget."
+msgstr ""
+"ViaBill PriceTag <script> tag returneret af ViaBill ved login/registrering. "
+"Indsæt hele <script>...</script> HTML som leveret af ViaBill. Dette script "
+"injiceres på hver frontend-side for at aktivere PriceTag-widgetten."
+
+#: payment_viabill/models/payment_provider.py:60
+msgid "API Mode"
+msgstr "API-tilstand"
+
+#: payment_viabill/models/payment_provider.py:57
+msgid "Test"
+msgstr "Prøve"
+
+#: payment_viabill/models/payment_provider.py:58
+msgid "Production / Live"
+msgstr "Produktion / Live"
+
+#: payment_viabill/models/payment_provider.py:64
+msgid ""
+"Controls whether the 'test' flag is sent to the ViaBill API. Use 'Test' "
+"while developing or testing (even when Odoo is in Enabled/Production state)."
+" Switch to 'Production / Live' only when you are ready to process real "
+"payments."
+msgstr ""
+"Styrer om 'test'-flaget sendes til ViaBill API. Brug 'Test', mens du "
+"udvikler eller tester (selv når Odoo er i aktiveret/produktionstilstand). "
+"Skift først til 'Produktion / Live', når du er klar til at behandle rigtige "
+"betalinger."
+
+#: payment_viabill/models/payment_provider.py:77
+msgid "Transaction Type"
+msgstr "Transaktionstype"
+
+#: payment_viabill/models/payment_provider.py:74
+msgid "Authorize Only"
+msgstr "Godkend kun"
+
+#: payment_viabill/models/payment_provider.py:75
+msgid "Authorize and Capture"
+msgstr "Autoriser og fange"
+
+#: payment_viabill/models/payment_provider.py:81
+msgid ""
+"Controls whether payments are only authorized (requiring manual capture "
+"later) or automatically captured when ViaBill confirms the payment."
+msgstr ""
+"Styrer, om betalinger kun er godkendt (kræver manuel registrering senere) "
+"eller automatisk registreres, når ViaBill bekræfter betalingen."
+
+#: payment_viabill/models/payment_provider.py:89
+msgid "Show PriceTag on Product Page"
+msgstr "Vis prismærke på produktsiden"
+
+#: payment_viabill/models/payment_provider.py:91
+msgid ""
+"Display the ViaBill PriceTag instalment widget below the price on product "
+"pages."
+msgstr "Vis ViaBill PriceTag rate-widgetten under prisen på produktsider."
+
+#: payment_viabill/models/payment_provider.py:94
+msgid "Show PriceTag on Cart Page"
+msgstr "Vis prismærke på kurvsiden"
+
+#: payment_viabill/models/payment_provider.py:96
+msgid ""
+"Display the ViaBill PriceTag instalment widget below the total on the cart "
+"page."
+msgstr "Vis ViaBill PriceTag rate-widgetten under totalen på kurvsiden."
+
+#: payment_viabill/models/payment_provider.py:99
+msgid "Show PriceTag on Checkout Page"
+msgstr "Vis prismærke på betalingssiden"
+
+#: payment_viabill/models/payment_provider.py:102
+msgid ""
+"Display the ViaBill PriceTag instalment widget below the total on the "
+"checkout / payment page."
+msgstr ""
+"Vis ViaBill PriceTag rate-widgetten under det samlede beløb på "
+"betalings-/betalingssiden."
+
+#: payment_viabill/models/payment_provider.py:115
+msgid "PriceTag Country"
+msgstr "Prismærke land"
+
+#: payment_viabill/models/payment_provider.py:109
+msgid "Auto-detect (use shop's country)"
+msgstr "Automatisk registrering (brug butikkens land)"
+
+#: payment_viabill/models/payment_provider.py:110
+msgid "Denmark"
+msgstr "Danmark"
+
+#: payment_viabill/models/payment_provider.py:111
+msgid "Spain"
+msgstr "Spanien"
+
+#: payment_viabill/models/payment_provider.py:112
+msgid "United States"
+msgstr "USA"
+
+#: payment_viabill/models/payment_provider.py:113
+msgid "Norway"
+msgstr "Norge"
+
+#: payment_viabill/models/payment_provider.py:118
+msgid ""
+"The country code sent to the ViaBill PriceTag widget. 'Auto-detect' uses the"
+" shop company's country. Override this if the auto-detected country is "
+"incorrect."
+msgstr ""
+"Landekoden sendt til ViaBill PriceTag-widgetten. 'Auto-detect' bruger "
+"butiksvirksomhedens land. Tilsidesæt dette, hvis det automatisk detekterede "
+"land er forkert."
+
+#: payment_viabill/models/payment_provider.py:131
+msgid "PriceTag Language"
+msgstr "Prismærkesprog"
+
+#: payment_viabill/models/payment_provider.py:126
+msgid "Auto-detect (use browser language)"
+msgstr "Automatisk registrering (brug browsersprog)"
+
+#: payment_viabill/models/payment_provider.py:127
+msgid "English"
+msgstr "engelsk"
+
+#: payment_viabill/models/payment_provider.py:128
+msgid "Spanish"
+msgstr "spansk"
+
+#: payment_viabill/models/payment_provider.py:129
+msgid "Danish"
+msgstr "dansk"
+
+#: payment_viabill/models/payment_provider.py:134
+msgid ""
+"The language code sent to the ViaBill PriceTag widget. 'Auto-detect' uses "
+"the current Odoo frontend language. Override this to force a specific "
+"language for the widget."
+msgstr ""
+"Sprogkoden sendt til ViaBill PriceTag-widget. 'Auto-detect' bruger det "
+"aktuelle Odoo-frontend-sprog. Tilsidesæt dette for at tvinge et bestemt "
+"sprog til widgetten."
+
+#: payment_viabill/models/payment_provider.py:141
+msgid "Custom CSS"
+msgstr "Brugerdefineret CSS"
+
+#: payment_viabill/models/payment_provider.py:143
+msgid ""
+"Optional CSS rules injected into every frontend page when PriceTags are "
+"active. Use this to adjust the placement and alignment of the ViaBill "
+"PriceTag widget, e.g.: .viabill-pricetag { margin-top: 8px; text-align: "
+"center; }"
+msgstr ""
+"Valgfri CSS-regler injiceret på hver frontend-side, når prismærker er "
+"aktive. Brug dette til at justere placeringen og justeringen af ​​ViaBill "
+"PriceTag-widgetten, f.eks.: .viabill-pricetag { margin-top: 8px; tekst-"
+"align: center; }"
+
+#: payment_viabill/models/payment_provider.py:151
+msgid "Custom JavaScript"
+msgstr "Brugerdefineret JavaScript"
+
+#: payment_viabill/models/payment_provider.py:153
+msgid ""
+"Optional JavaScript injected into every frontend page when PriceTags are "
+"active. Runs after the ViaBill PriceTag script has been loaded. Use this for"
+" advanced customisation of the widget behaviour."
+msgstr ""
+"Valgfri JavaScript indsprøjtet på hver frontend-side, når prismærker er "
+"aktive. Kører efter ViaBill PriceTag-scriptet er blevet indlæst. Brug dette "
+"til avanceret tilpasning af widget-adfærden."
+
+#: payment_viabill/models/payment_provider.py:162
+msgid "PriceTag Product Selector"
+msgstr "PriceTag produktvælger"
+
+#: payment_viabill/models/payment_provider.py:165
+msgid ""
+"CSS selector used by the ViaBill PriceTag widget to read the current product"
+" price on product pages. Default: .oe_price"
+msgstr ""
+"CSS-vælger, der bruges af ViaBill PriceTag-widgetten til at læse den "
+"aktuelle produktpris på produktsider. Standard: .oe_price"
+
+#: payment_viabill/models/payment_provider.py:171
+msgid "PriceTag Cart Selector"
+msgstr "Prismærkevognsvælger"
+
+#: payment_viabill/models/payment_provider.py:174
+msgid ""
+"CSS selector used by the ViaBill PriceTag widget to read the order total on "
+"the cart page. Default: strong.monetary_field"
+msgstr ""
+"CSS-vælger, der bruges af ViaBill PriceTag-widgetten til at læse den samlede"
+" ordre på kurvsiden. Standard: strong.monetary_field"
+
+#: payment_viabill/models/payment_provider.py:180
+msgid "PriceTag Checkout Selector"
+msgstr "PriceTag Checkout Selector"
+
+#: payment_viabill/models/payment_provider.py:183
+msgid ""
+"CSS selector used by the ViaBill PriceTag widget to read the order total on "
+"the checkout / payment page. Default: strong.monetary_field"
+msgstr ""
+"CSS-vælger, der bruges af ViaBill PriceTag-widgetten til at læse den samlede"
+" ordre på betalings-/betalingssiden. Standard: strong.monetary_field"
+
+#: payment_viabill/models/payment_provider.py:198
+msgid "Order State after Authorize"
+msgstr "Bestil tilstand efter autoriseret"
+
+#: payment_viabill/models/payment_provider.py:193
+msgid "Pending Payment"
+msgstr "Afventer betaling"
+
+#: payment_viabill/models/payment_provider.py:194
+msgid "Sales Order / Confirmed"
+msgstr "Salgsordre / bekræftet"
+
+#: payment_viabill/models/payment_provider.py:195
+msgid "Locked"
+msgstr "Låst"
+
+#: payment_viabill/models/payment_provider.py:196
+msgid "Quotation"
+msgstr "Citat"
+
+#: payment_viabill/models/payment_provider.py:202
+msgid ""
+"The sale order state to set after a successful ViaBill payment authorization"
+" (when Transaction Type is 'Authorize Only'). Default: Sales Order / "
+"Confirmed."
+msgstr ""
+"Den salgsordretilstand, der skal indstilles efter en vellykket ViaBill-"
+"betalingsautorisation (når Transaktionstype er 'Kun autorisere'). Standard: "
+"Salgsordre/Bekræftet."
+
+#: payment_viabill/models/payment_provider.py:215
+msgid "Order State after Capture"
+msgstr "Ordretilstand efter Capture"
+
+#: payment_viabill/models/payment_provider.py:219
+msgid ""
+"The sale order state to set after a successful ViaBill payment capture (when"
+" Transaction Type is 'Authorize and Capture'). Default: Sales Order / "
+"Confirmed."
+msgstr ""
+"Den salgsordretilstand, der skal indstilles efter en vellykket ViaBill-"
+"betalingsregistrering (når Transaction Type er 'Autorize and Capture'). "
+"Standard: Salgsordre/Bekræftet."
+
+#: payment_viabill/models/payment_provider.py:228
+msgid "Enable Debug"
+msgstr "Aktiver fejlretning"
+
+#: payment_viabill/models/payment_provider.py:231
+msgid ""
+"When enabled, detailed ViaBill API request/response information is stored in"
+" the Debug Log below. Disable in production to avoid storing sensitive data."
+" The log is capped at 50 entries."
+msgstr ""
+"Når det er aktiveret, gemmes detaljerede ViaBill API-"
+"anmodnings-/svaroplysninger i fejlretningsloggen nedenfor. Deaktiver i "
+"produktion for at undgå lagring af følsomme data. Loggen er begrænset til 50"
+" poster."
+
+#: payment_viabill/models/payment_provider.py:238
+msgid "Debug Log"
+msgstr "Debug log"
+
+#: payment_viabill/models/payment_provider.py:240
+msgid ""
+"Recent ViaBill API debug messages (last 50 entries). Cleared automatically "
+"when it exceeds 50 entries."
+msgstr ""
+"Seneste ViaBill API-fejlretningsmeddelelser (sidste 50 poster). Ryddes "
+"automatisk, når det overstiger 50 poster."

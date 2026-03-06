@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_method_viabill" model="payment.method">
+        <field name="name">ViaBill</field>
+        <field name="code">viabill</field>
+        <field name="sequence" eval="10"/>
+        <field name="is_primary" eval="True"/>
+        <field name="support_tokenization" eval="False"/>
+        <field name="support_express_checkout" eval="False"/>
+        <field name="support_manual_capture" eval="'partial'"/>
+        <field name="image_payment_form" type="base64" file="payment_viabill/static/files/viabill_logo.png"/>
+    </record>
+
+</odoo>

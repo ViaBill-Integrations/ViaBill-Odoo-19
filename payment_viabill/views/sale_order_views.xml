@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the sale order form view to add a "Refund Transaction" button.
+         The button is visible only when there is at least one captured (done) ViaBill
+         transaction linked to the order, i.e. after a successful payment capture.
+
+         In Odoo 19 the field was renamed from authorized_transaction_ids (Many2many)
+         to has_authorized_transaction_ids (Boolean). We anchor our XPath on the
+         payment_action_void button which is stable across versions. -->
+    <record id="sale_order_form_viabill_refund" model="ir.ui.view">
+        <field name="name">sale.order.form.viabill.refund</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add the Refund button after the Void Transaction button. -->
+            <xpath expr="//button[@name='payment_action_void']" position="after">
+                <!-- Inject the computed field so the button's invisible condition can use it. -->
+                <field name="viabill_done_transaction_ids" invisible="1"/>
+                <button
+                    name="payment_action_viabill_refund"
+                    type="object"
+                    string="Refund Transaction"
+                    invisible="not viabill_done_transaction_ids"
+                    confirm="Are you sure you want to refund this ViaBill transaction? This action cannot be undone."
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
