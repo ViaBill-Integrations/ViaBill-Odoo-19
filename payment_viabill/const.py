@@ -34,16 +34,16 @@ STATUS_MAPPING = {
 }
 
 # Signature format strings
-# Checkout: md5(apikey#amount#currency#transaction#orderNumber#successUrl#cancelUrl#secret)
+# Checkout: sha256(apikey#amount#currency#transaction#orderNumber#successUrl#cancelUrl#secret)
 CHECKOUT_SIGNATURE_FORMAT = '{apikey}#{amount}#{currency}#{transaction}#{order_number}#{success_url}#{cancel_url}#{secret}'
 
-# Callback: md5(transaction#orderNumber#amount#currency#status#time#secret)
+# Callback: sha256(transaction#orderNumber#amount#currency#status#time#secret)
 CALLBACK_SIGNATURE_FORMAT = '{transaction}#{order_number}#{amount}#{currency}#{status}#{time}#{secret}'
 
-# Capture/Refund: md5(id#apikey#amount#currency#secret)
+# Capture/Refund: sha256(id#apikey#amount#currency#secret)
 CAPTURE_SIGNATURE_FORMAT = '{id}#{apikey}#{amount}#{currency}#{secret}'
 
-# Cancel: md5(id#apikey#secret)
+# Cancel: sha256(id#apikey#secret)
 CANCEL_SIGNATURE_FORMAT = '{id}#{apikey}#{secret}'
 
 # Sensitive keys to be masked in logs

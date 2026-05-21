@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 {
     'name': 'Payment Provider: ViaBill',
-    'version': '19.0.4.0.0',
+    'version': '19.0.5.0.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
     'summary': "ViaBill — Pay later.",

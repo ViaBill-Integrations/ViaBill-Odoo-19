@@ -27,7 +27,7 @@
             <input type="hidden" name="success_url"  t-att-value="success_url"/>
             <input type="hidden" name="cancel_url"   t-att-value="cancel_url"/>
             <input type="hidden" name="callback_url" t-att-value="callback_url"/>
-            <input type="hidden" name="md5check"     t-att-value="md5check"/>
+            <input type="hidden" name="sha256check"  t-att-value="sha256check"/>
             <input type="hidden" name="test"         t-att-value="test"/>
 
             <button type="submit" class="btn btn-primary o_viabill_submit_btn">

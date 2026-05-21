@@ -394,15 +394,18 @@ class PaymentProvider(models.Model):
         self.ensure_one()
         if self.viabill_api_mode == 'test':
             return const.VIABILL_TEST_URL
-        return const.VIABILL_LIVE_URL
+        return const.VIABILL_LIVE_URL    
 
     def _viabill_generate_checkout_signature(
-        self, api_key, amount, currency, transaction, order_number, success_url, cancel_url
+        self, api_key, amount, currency, transaction, order_number, success_url, cancel_url, is_test
     ):
-        """Generate the MD5 signature for a ViaBill checkout request.
+        """Generate the SHA-256 signature for a ViaBill checkout request.
 
         Signature format:
-        ``md5({apikey}#{amount}#{currency}#{transaction}#{order_number}#{success_url}#{cancel_url}#{secret})``
+            if is_test:
+                sha256({apikey}#{amount}#{currency}#{transaction}#{order_number}#{success_url}#{cancel_url}#{secret})
+            else:
+                sha256({apikey}#{amount}#{currency}#{transaction}#{order_number}#{success_url}#{cancel_url}#{secret})#true
 
         Note: self.ensure_one()
 
@@ -413,10 +416,11 @@ class PaymentProvider(models.Model):
         :param str order_number: The Odoo order number (same as transaction).
         :param str success_url: The full success redirect URL.
         :param str cancel_url: The full cancel redirect URL.
-        :return: The hex MD5 signature string.
+        :return: The hex SHA-256 signature string.
         :rtype: str
         """
         self.ensure_one()
+
         raw = const.CHECKOUT_SIGNATURE_FORMAT.format(
             apikey=api_key,
             amount=amount,
@@ -427,23 +431,25 @@ class PaymentProvider(models.Model):
             cancel_url=cancel_url,
             secret=self.viabill_secret_key or '',
         )
-        return hashlib.md5(raw.encode('utf-8')).hexdigest()
+
+        return hashlib.sha256(raw.encode('utf-8')).hexdigest()
 
     def _viabill_generate_capture_signature(self, amount, currency, transaction):
-        """Generate the MD5 signature for a ViaBill capture or refund request.
+        """Generate the SHA-256 signature for a ViaBill capture or refund request.
 
         Signature format:
-        ``md5({id}#{apikey}#{amount}#{currency}#{secret})``
+        ``sha256({id}#{apikey}#{amount}#{currency}#{secret})``
 
         Note: self.ensure_one()
 
         :param str amount: The capture/refund amount as a string (negative, e.g. "-100.00").
         :param str currency: The ISO 4217 currency code.
         :param str transaction: The ViaBill transaction ID (provider_reference).
-        :return: The hex MD5 signature string.
+        :return: The hex SHA-256 signature string.
         :rtype: str
         """
         self.ensure_one()
+
         raw = const.CAPTURE_SIGNATURE_FORMAT.format(
             id=transaction,
             apikey=self.viabill_api_key or '',
@@ -451,35 +457,39 @@ class PaymentProvider(models.Model):
             currency=currency,
             secret=self.viabill_secret_key or '',
         )
-        return hashlib.md5(raw.encode('utf-8')).hexdigest()
+
+        return hashlib.sha256(raw.encode('utf-8')).hexdigest()
 
     def _viabill_generate_cancel_signature(self, transaction):
-        """Generate the MD5 signature for a ViaBill cancel (void) request.
+        """Generate the SHA-256 signature for a ViaBill cancel (void) request.
 
         Signature format:
-        ``md5({id}#{apikey}#{secret})``
+        ``sha256({id}#{apikey}#{secret})``
 
         Note: self.ensure_one()
 
         :param str transaction: The ViaBill transaction ID (provider_reference).
-        :return: The hex MD5 signature string.
+        :return: The hex SHA-256 signature string.
         :rtype: str
         """
         self.ensure_one()
+
         raw = const.CANCEL_SIGNATURE_FORMAT.format(
             id=transaction,
             apikey=self.viabill_api_key or '',
             secret=self.viabill_secret_key or '',
         )
-        return hashlib.md5(raw.encode('utf-8')).hexdigest()
+
+        return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
 
     def _viabill_verify_callback_signature(
         self, transaction, order_number, amount, currency, status, time, received_signature
     ):
-        """Verify the MD5 signature received in a ViaBill IPN callback notification.
+        """Verify the SHA-256 signature received in a ViaBill IPN callback notification.
 
         Expected signature format:
-        ``md5({transaction}#{orderNumber}#{amount}#{currency}#{status}#{time}#{secret})``
+        ``sha256({transaction}#{orderNumber}#{amount}#{currency}#{status}#{time}#{secret})``
 
         Note: self.ensure_one()
 
@@ -494,6 +504,7 @@ class PaymentProvider(models.Model):
         :rtype: bool
         """
         self.ensure_one()
+
         raw = const.CALLBACK_SIGNATURE_FORMAT.format(
             transaction=transaction,
             order_number=order_number,
@@ -503,7 +514,9 @@ class PaymentProvider(models.Model):
             time=time,
             secret=self.viabill_secret_key or '',
         )
-        expected = hashlib.md5(raw.encode('utf-8')).hexdigest()
+
+        expected = hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
         return expected == received_signature
 
     def _viabill_call_api(self, method, endpoint, payload=None):

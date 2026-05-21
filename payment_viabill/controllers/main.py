@@ -90,24 +90,24 @@ class ViaBillController(http.Controller):
 
         # Build the JSON payload for ViaBill from the form fields.
         payload = {
-            'apikey':       data.get('apikey', ''),
-            'transaction':  data.get('transaction', ''),
-            'order_number': data.get('order_number', ''),
-            'amount':       data.get('amount', ''),
-            'currency':     data.get('currency', ''),
-            'success_url':  data.get('success_url', ''),
-            'cancel_url':   data.get('cancel_url', ''),
-            'callback_url': data.get('callback_url', ''),
-            'md5check':     data.get('md5check', ''),
-            'test':         test_flag,
-            'protocol':     data.get('protocol', '3.0'),
-            'tbyb':         0,
+            'apikey':        data.get('apikey', ''),
+            'transaction':   data.get('transaction', ''),
+            'order_number':  data.get('order_number', ''),
+            'amount':        data.get('amount', ''),
+            'currency':      data.get('currency', ''),
+            'success_url':   data.get('success_url', ''),
+            'cancel_url':    data.get('cancel_url', ''),
+            'callback_url':  data.get('callback_url', ''),
+            'sha256check':   data.get('sha256check', ''),
+            'test':          test_flag,
+            'protocol':      data.get('protocol', '3.1'),
+            'tbyb':          0,
         }
 
         _logger.info(
-            "ViaBill checkout: POST URL: %s\nPayload (apikey/md5check masked):\n%s",
+            "ViaBill checkout: POST URL: %s\nPayload (apikey/sha256check masked):\n%s",
             checkout_url,
-            {k: ('***' if k in ('apikey', 'md5check') else v) for k, v in payload.items()},
+            {k: ('***' if k in ('apikey', 'sha256check') else v) for k, v in payload.items()},
         )
 
         headers = {
@@ -140,6 +140,7 @@ class ViaBillController(http.Controller):
             dict(resp.headers),
             resp.text[:300],
         )
+
         if provider_sudo:
             provider_sudo._viabill_debug_log(
                 'Checkout {} → HTTP {} | response={}'.format(
@@ -170,9 +171,11 @@ class ViaBillController(http.Controller):
                     )
             except ValueError:
                 error_msg = resp.text[:200]
+
             _logger.warning(
                 "ViaBill checkout: unexpected status %s. Error: %s",
-                resp.status_code, error_msg,
+                resp.status_code,
+                error_msg,
             )
 
         return request.make_response(
@@ -284,7 +287,7 @@ class ViaBillController(http.Controller):
         - ``currency``:     ISO currency code (e.g. "DKK")
         - ``status``:       Payment status (e.g. "APPROVED", "CANCELLED", "REJECTED")
         - ``time``:         Unix timestamp in milliseconds
-        - ``signature``:    MD5 signature for verification
+        - ``signature``:    sha256 signature for verification
 
         :param dict data: Form-encoded POST parameters (may be empty if ViaBill sends JSON).
         :return: An empty 200 response to acknowledge the notification.
@@ -312,7 +315,7 @@ class ViaBillController(http.Controller):
         currency = data.get('currency', '')
         status = data.get('status', '')
         time_val = data.get('time', '')
-        received_signature = data.get('signature', '') or data.get('md5check', '')
+        received_signature = data.get('signature', '') or data.get('sha256check', '')
 
         if not order_number:
             _logger.warning(

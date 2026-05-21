@@ -66,6 +66,12 @@ class PaymentTransaction(models.Model):
         )
         callback_url = base_url + ViaBillController._callback_url
 
+        # The form posts to the local Odoo proxy endpoint, which then calls ViaBill server-side.
+        checkout_url = base_url + ViaBillController._checkout_url
+
+        # The test flag is driven by the provider state: 'test' → True, 'enabled' → False.
+        is_test = self.provider_id.state == 'test'
+
         signature = self.provider_id._viabill_generate_checkout_signature(
             api_key=self.provider_id.viabill_api_key,
             amount=amount_str,
@@ -74,17 +80,12 @@ class PaymentTransaction(models.Model):
             order_number=reference,
             success_url=success_url,
             cancel_url=cancel_url,
-        )
-
-        # The form posts to the local Odoo proxy endpoint, which then calls ViaBill server-side.
-        checkout_url = base_url + ViaBillController._checkout_url
-
-        # The test flag is driven by the provider state: 'test' → True, 'enabled' → False.
-        is_test = self.provider_id.state == 'test'
+            is_test=is_test
+        )        
 
         return {
             'checkout_url': checkout_url,
-            'protocol': '3.0',
+            'protocol': '3.1',
             'apikey': self.provider_id.viabill_api_key,
             'transaction': reference,
             'order_number': reference,
@@ -93,7 +94,7 @@ class PaymentTransaction(models.Model):
             'success_url': success_url,
             'cancel_url': cancel_url,
             'callback_url': callback_url,
-            'md5check': signature,
+            'sha256check': signature,
             # 'test' is sent as the string 'true'/'false'; the proxy converts it to JSON boolean.
             'test': 'true' if is_test else 'false',
         }
