@@ -27,8 +27,6 @@ class ViaBillController(http.Controller):
     _return_url = '/payment/viabill/return'
     _cancel_url = '/payment/viabill/cancel'
     _callback_url = '/payment/viabill/callback'
-    _login_url = '/payment/viabill/login'
-    _register_url = '/payment/viabill/register'
 
     # =========================================================================
     # CHECKOUT PROXY
@@ -402,64 +400,3 @@ class ViaBillController(http.Controller):
                 )
 
         return request.make_response('', status=200)
-
-    # =========================================================================
-    # AUTHENTICATION ENDPOINTS (called from the provider form via JSON-RPC)
-    # =========================================================================
-
-    @http.route(
-        _login_url,
-        type='jsonrpc',
-        auth='user',
-        methods=['POST'],
-        csrf=True,
-    )
-    def viabill_login(self, provider_id, email, password):
-        """Handle the ViaBill merchant login from the provider configuration form.
-
-        :param int provider_id: The ID of the payment.provider record.
-        :param str email: The merchant's ViaBill account email.
-        :param str password: The merchant's ViaBill account password.
-        :return: Result dict with ``success`` flag and ``message`` or ``error``.
-        :rtype: dict
-        """
-        provider_sudo = request.env['payment.provider'].sudo().browse(provider_id)
-        if not provider_sudo.exists() or provider_sudo.code != 'viabill':
-            return {'success': False, 'error': 'Invalid provider.'}
-        try:
-            provider_sudo.action_viabill_login(email=email, password=password)
-            return {'success': True, 'message': 'Credentials saved successfully.'}
-        except (UserError, Exception) as exc:
-            return {'success': False, 'error': str(exc)}
-
-    @http.route(
-        _register_url,
-        type='jsonrpc',
-        auth='user',
-        methods=['POST'],
-        csrf=True,
-    )
-    def viabill_register(self, provider_id, email, name, url, country, tax_id=None, phone=None):
-        """Handle the ViaBill merchant registration from the provider configuration form.
-
-        :param int provider_id: The ID of the payment.provider record.
-        :param str email: The merchant's email address.
-        :param str name: The store name.
-        :param str url: The live shop URL (must start with https://).
-        :param str country: Two-letter ISO 3166-1 alpha-2 country code.
-        :param str tax_id: Optional tax ID / VAT number.
-        :param str phone: Optional phone number.
-        :return: Result dict with ``success`` flag and ``message`` or ``error``.
-        :rtype: dict
-        """
-        provider_sudo = request.env['payment.provider'].sudo().browse(provider_id)
-        if not provider_sudo.exists() or provider_sudo.code != 'viabill':
-            return {'success': False, 'error': 'Invalid provider.'}
-        try:
-            provider_sudo.action_viabill_register(
-                email=email, name=name, url=url, country=country,
-                tax_id=tax_id, phone=phone,
-            )
-            return {'success': True, 'message': 'Account created and credentials saved.'}
-        except (UserError, Exception) as exc:
-            return {'success': False, 'error': str(exc)}

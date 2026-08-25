@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 {
     'name': 'Payment Provider: ViaBill',
-    'version': '19.0.5.0.0',
+    'version': '19.0.6.0.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
     'summary': "ViaBill — Pay later.",
@@ -29,10 +29,6 @@
             'payment_viabill/static/src/interactions/**/*',
             'payment_viabill/static/src/js/viabill_pricetags.js',
             'payment_viabill/static/src/scss/viabill.scss',
-        ],
-        # Backend assets: provider configuration form login/register handlers
-        'web.assets_backend': [
-            'payment_viabill/static/src/backend/viabill_provider_form.js',
         ],
     },
     'author': 'ViaBill A/S',

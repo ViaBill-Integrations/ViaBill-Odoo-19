@@ -10,8 +10,6 @@ VIABILL_ADDON_NAME = 'woocommerce'
 
 # ViaBill API endpoint paths
 CHECKOUT_ENDPOINT = '/api/checkout-authorize/addon/' + VIABILL_ADDON_NAME
-LOGIN_ENDPOINT = '/api/addon/' + VIABILL_ADDON_NAME + '/login'
-REGISTER_ENDPOINT = '/api/addon/' + VIABILL_ADDON_NAME + '/register'
 CAPTURE_ENDPOINT = '/api/transaction/capture'
 REFUND_ENDPOINT = '/api/transaction/refund'
 CANCEL_ENDPOINT = '/api/transaction/cancel'

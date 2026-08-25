@@ -32,20 +32,27 @@ class PaymentProvider(models.Model):
 
     viabill_api_key = fields.Char(
         string="API Key",
-        help="The API key provided by ViaBill for your merchant account.",
+        help=(
+            "The API key for your ViaBill merchant account. "
+            "You can find this value in your ViaBill merchant account."
+        ),
         copy=False,
     )
     viabill_secret_key = fields.Char(
         string="Secret Key",
-        help="The secret key provided by ViaBill, used to sign API requests.",
+        help=(
+            "The secret key for your ViaBill merchant account, used to sign API "
+            "requests. You can find this value in your ViaBill merchant account."
+        ),
         copy=False,
         groups='base.group_system',
     )
     viabill_pricetag_script = fields.Text(
         string="PriceTag Script",
         help=(
-            "The ViaBill PriceTag <script> tag returned by ViaBill on login/register. "
-            "Paste the full <script>…</script> HTML as provided by ViaBill. "
+            "The ViaBill PriceTag script snippet from your ViaBill merchant account. "
+            "Paste the full <script>…</script> HTML as provided by ViaBill "
+            "(raw inline JavaScript without the tags is also accepted). "
             "This script is injected into every frontend page to enable the PriceTag widget."
         ),
         copy=False,
@@ -316,6 +323,24 @@ class PaymentProvider(models.Model):
         })
 
     # =========================================================================
+    # AVAILABILITY
+    # =========================================================================
+
+    @api.model
+    def _get_compatible_providers(self, *args, **kwargs):
+        """Override of `payment` to hide ViaBill until it is configured.
+
+        The ViaBill payment option is not offered at checkout until the
+        merchant has entered the ViaBill account credentials (API key and
+        secret key) in the provider configuration.
+        """
+        providers = super()._get_compatible_providers(*args, **kwargs)
+        return providers.filtered(
+            lambda p: p.code != 'viabill'
+            or (p.sudo().viabill_api_key and p.sudo().viabill_secret_key)
+        )
+
+    # =========================================================================
     # DEBUG LOGGING HELPER
     # =========================================================================
 
@@ -579,77 +604,6 @@ class PaymentProvider(models.Model):
             raise UserError(_("ViaBill API error (HTTP %s): %s", resp.status_code, msg))
 
         return data
-
-    # =========================================================================
-    # MERCHANT AUTHENTICATION ACTIONS
-    # =========================================================================
-
-    def action_viabill_login(self, email, password):
-        """Log in to ViaBill and store the returned credentials.
-
-        Calls ``POST /api/addon/woocommerce/login`` with the merchant's email and
-        password. On success, stores the returned ``key``, ``secret``, and
-        ``pricetagScript`` on the provider record.
-
-        :param str email: The merchant's ViaBill account email.
-        :param str password: The merchant's ViaBill account password.
-        :raises UserError: If the login request fails.
-        """
-        self.ensure_one()
-        data = self._viabill_call_api(
-            'POST',
-            const.LOGIN_ENDPOINT,
-            payload={'email': email, 'password': password},
-        )
-        self.sudo().write({
-            'viabill_api_key': data.get('key', ''),
-            'viabill_secret_key': data.get('secret', ''),
-            'viabill_pricetag_script': data.get('pricetagScript', ''),
-        })
-        _logger.info("ViaBill login successful for provider %s.", self.id)
-
-    def action_viabill_register(self, email, name, url, country, tax_id=None, phone=None):
-        """Register a new ViaBill merchant account and store the returned credentials.
-
-        Calls ``POST /api/addon/woocommerce/register`` with the merchant's details.
-        On success, stores the returned ``key``, ``secret``, and ``pricetagScript``
-        on the provider record.
-
-        :param str email: The merchant's email address.
-        :param str name: The store name.
-        :param str url: The live shop URL (must start with https://).
-        :param str country: Two-letter ISO 3166-1 alpha-2 country code (e.g. "DK").
-        :param str tax_id: Optional tax ID / VAT number.
-        :param str phone: Optional phone number.
-        :raises UserError: If the registration request fails.
-        """
-        self.ensure_one()
-        payload = {
-            'email': email,
-            'name': name,
-            'url': url,
-            'country': country.upper(),
-            'affiliate': 'woocommerce',
-        }
-        additional_info = []
-        if tax_id:
-            additional_info.append('taxId:{}'.format(tax_id))
-        if phone:
-            additional_info.append('phone:{}'.format(phone))
-        if additional_info:
-            payload['additionalInfo'] = additional_info
-
-        data = self._viabill_call_api(
-            'POST',
-            const.REGISTER_ENDPOINT,
-            payload=payload,
-        )
-        self.sudo().write({
-            'viabill_api_key': data.get('key', ''),
-            'viabill_secret_key': data.get('secret', ''),
-            'viabill_pricetag_script': data.get('pricetagScript', ''),
-        })
-        _logger.info("ViaBill registration successful for provider %s.", self.id)
 
     # =========================================================================
     # DEBUG LOG ACTIONS
