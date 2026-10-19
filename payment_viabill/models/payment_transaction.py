@@ -4,12 +4,14 @@
 import json
 import logging
 import pprint
+from urllib.parse import urlencode
 
 import requests
 
 from odoo import _, api, models
 from odoo.exceptions import ValidationError
 
+from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_viabill import const
 from odoo.addons.payment_viabill.controllers.main import ViaBillController
@@ -41,6 +43,28 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'viabill':
             return super()._get_specific_rendering_values(processing_values)
 
+        return self._viabill_get_checkout_values()
+
+    def _viabill_get_checkout_values(self):
+        """Return the ViaBill checkout values of this transaction.
+
+        The values are always built server-side from the transaction itself
+        (amount, currency, reference, URLs, checksum); they are used both to
+        render the redirect form and by the checkout proxy, which never trusts
+        values posted by the browser.
+
+        Note: self.ensure_one()
+
+        :return: The checkout values.
+        :rtype: dict
+        """
+        self.ensure_one()
+        processing_values = {
+            'amount': self.amount,
+            'currency_id': self.currency_id.id,
+            'reference': self.reference,
+        }
+
         base_url = self.provider_id.get_base_url()
         # Force https:// to avoid browser mixed-content warnings when Odoo sits behind a
         # reverse proxy (e.g. ngrok) that terminates TLS but forwards plain HTTP internally.
@@ -55,15 +79,15 @@ class PaymentTransaction(models.Model):
 
         reference = processing_values['reference']
         # Embed the reference as a query parameter so the return/cancel handlers
-        # can identify the transaction even when ViaBill sends no body parameters.
-        success_url = '{}{}'.format(
-            base_url + ViaBillController._return_url,
-            '?ref={}'.format(reference),
-        )
-        cancel_url = '{}{}'.format(
-            base_url + ViaBillController._cancel_url,
-            '?ref={}'.format(reference),
-        )
+        # can identify the transaction even when ViaBill sends no body parameters,
+        # together with an access token, so these public URLs can not be used
+        # to act on other transactions.
+        url_params = urlencode({
+            'ref': reference,
+            'access_token': payment_utils.generate_access_token(reference, env=self.env),
+        })
+        success_url = '{}?{}'.format(base_url + ViaBillController._return_url, url_params)
+        cancel_url = '{}?{}'.format(base_url + ViaBillController._cancel_url, url_params)
         callback_url = base_url + ViaBillController._callback_url
 
         # The form posts to the local Odoo proxy endpoint, which then calls ViaBill server-side.
@@ -135,7 +159,7 @@ class PaymentTransaction(models.Model):
         self.provider_id._viabill_debug_log(
             'TX API {} {} → HTTP {} | payload={} | response={}'.format(
                 method, endpoint, resp.status_code,
-                json.dumps(payload),
+                json.dumps(self.provider_id._viabill_mask_payload(payload)),
                 resp.text[:500],
             )
         )

@@ -1,7 +1,7 @@
 # Copyright 2026 ViaBill A/S
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 
 class SaleOrder(models.Model):
@@ -48,6 +48,8 @@ class SaleOrder(models.Model):
         the request is submitted to the ViaBill API.
         """
         self.ensure_one()
+        if not self.env.user.has_group('account.group_account_invoice'):
+            raise AccessError(_("You are not allowed to refund ViaBill payments."))
         done_txs = self.viabill_done_transaction_ids
         if not done_txs:
             raise UserError(_("There are no captured ViaBill transactions to refund."))

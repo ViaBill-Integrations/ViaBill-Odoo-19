@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_viabill_refund_wizard_user,viabill.refund.wizard user,model_viabill_refund_wizard,base.group_user,1,1,1,1
+access_viabill_refund_wizard_billing,viabill.refund.wizard billing,model_viabill_refund_wizard,account.group_account_invoice,1,1,1,1

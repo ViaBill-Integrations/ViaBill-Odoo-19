@@ -2,14 +2,17 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 import hashlib
+import hmac
 import json
 import logging
 from datetime import datetime
+from urllib.parse import quote, urlencode
 
 import requests
+from markupsafe import Markup
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_viabill import const
@@ -28,7 +31,7 @@ class PaymentProvider(models.Model):
         ondelete={'viabill': 'set default'},
     )
 
-    # ── ViaBill-specific credential fields ────────────────────────────────────
+    #  ViaBill-specific credential fields ────────────────────────────────────
 
     viabill_api_key = fields.Char(
         string="API Key",
@@ -58,7 +61,7 @@ class PaymentProvider(models.Model):
         copy=False,
     )
 
-    # ── API mode (Test vs Production) ────────────────────────────────────────
+    #  API mode (Test vs Production) ────────────────────────────────────────
 
     viabill_api_mode = fields.Selection(
         selection=[
@@ -75,7 +78,7 @@ class PaymentProvider(models.Model):
         ),
     )
 
-    # ── Transaction type ──────────────────────────────────────────────────────
+    #  Transaction type ──────────────────────────────────────────────────────
 
     viabill_transaction_type = fields.Selection(
         selection=[
@@ -91,7 +94,7 @@ class PaymentProvider(models.Model):
         ),
     )
 
-    # ── PriceTag display toggles ──────────────────────────────────────────────
+    #  PriceTag display toggles ──────────────────────────────────────────────
 
     viabill_pricetag_product = fields.Boolean(
         string="Show PriceTag on Product Page",
@@ -164,7 +167,7 @@ class PaymentProvider(models.Model):
         ),
     )
 
-    # ── PriceTag CSS selectors ────────────────────────────────────────────────
+    #  PriceTag CSS selectors ────────────────────────────────────────────────
 
     viabill_pricetag_product_selector = fields.Char(
         string="PriceTag Product Selector",
@@ -194,7 +197,7 @@ class PaymentProvider(models.Model):
         ),
     )
 
-    # ── Order state after authorize / capture ─────────────────────────────────
+    #  Order state after authorize / capture ─────────────────────────────────
 
     viabill_order_state_after_authorize = fields.Selection(
         selection=[
@@ -230,11 +233,12 @@ class PaymentProvider(models.Model):
         ),
     )
 
-    # ── Debug / Troubleshooting ───────────────────────────────────────────────
+    #  Debug / Troubleshooting ───────────────────────────────────────────────
 
     viabill_enable_debug = fields.Boolean(
         string="Enable Debug",
         default=False,
+        groups='base.group_system',
         help=(
             "When enabled, detailed ViaBill API request/response information is "
             "stored in the Debug Log below. Disable in production to avoid storing "
@@ -245,6 +249,7 @@ class PaymentProvider(models.Model):
     viabill_debug_log = fields.Text(
         string="Debug Log",
         readonly=True,
+        groups='base.group_system',
         help="Recent ViaBill API debug messages (last 50 entries). Cleared automatically when it exceeds 50 entries.",
     )
 
@@ -323,6 +328,66 @@ class PaymentProvider(models.Model):
         })
 
     # =========================================================================
+    # PRICETAG CUSTOM CODE (frontend)
+    # =========================================================================
+
+    def viabill_get_custom_css_markup(self):
+        """Return the custom PriceTag CSS for the <style> element of the frontend.
+
+        The value is printed as is (so CSS such as child combinators keeps
+        working), but "<" is removed, so it can never close the <style> element.
+
+        :return: The CSS.
+        :rtype: markupsafe.Markup
+        """
+        self.ensure_one()
+        css = (self.sudo().viabill_pricetag_custom_css or '').replace('<', '')
+        return Markup(css)
+
+    def viabill_get_custom_js_markup(self):
+        """Return the custom PriceTag JavaScript for the <script> element of the frontend.
+
+        The value is printed as is, but "</" is written as "<\\/" (the same in
+        JavaScript), so it can never close the <script> element.
+
+        :return: The JavaScript.
+        :rtype: markupsafe.Markup
+        """
+        self.ensure_one()
+        js = (self.sudo().viabill_pricetag_custom_js or '').replace('</', '<\\/')
+        return Markup(js)
+
+    # =========================================================================
+    # SIGNUP
+    # =========================================================================
+
+    def _viabill_get_signup_url(self):
+        """Return the ViaBill online signup form URL for this shop.
+
+        Note: self.ensure_one()
+
+        :return: The signup URL.
+        :rtype: str
+        """
+        self.ensure_one()
+        params = {
+            'utm_source': 'odoo',
+            'utm_medium': 'plugin',
+            'utm_campaign': 'merchant_signup',
+            'shop_url': (self.get_base_url() or '').rstrip('/'),
+        }
+        return const.VIABILL_SIGNUP_URL + '?' + urlencode(params, quote_via=quote)
+
+    def action_viabill_open_signup(self):
+        """Open the ViaBill online signup form in a new browser tab."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self._viabill_get_signup_url(),
+            'target': 'new',
+        }
+
+    # =========================================================================
     # AVAILABILITY
     # =========================================================================
 
@@ -353,17 +418,38 @@ class PaymentProvider(models.Model):
         :param str message: The debug message to append.
         """
         self.ensure_one()
-        if not self.viabill_enable_debug:
+        provider = self.sudo()
+        if not provider.viabill_enable_debug:
             return
+        # The secret key is never part of the messages; mask it anyway, should
+        # it ever be echoed back (e.g. in an API response).
+        if provider.viabill_secret_key:
+            message = message.replace(provider.viabill_secret_key, '***')
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         entry = '[{}] {}'.format(timestamp, message)
-        existing = (self.viabill_debug_log or '').strip()
+        existing = (provider.viabill_debug_log or '').strip()
         lines = existing.split('\n') if existing else []
         lines.append(entry)
         # Keep only the last 50 entries
         if len(lines) > 50:
             lines = lines[-50:]
-        self.sudo().write({'viabill_debug_log': '\n'.join(lines)})
+        provider.write({'viabill_debug_log': '\n'.join(lines)})
+
+    @api.model
+    def _viabill_mask_payload(self, payload):
+        """Return a copy of an API payload that is safe to log or store.
+
+        The API key, signatures/checksums and secrets are replaced by '***'.
+
+        :param dict payload: The API payload.
+        :return: The masked payload.
+        :rtype: dict
+        """
+        masked_keys = set(const.SENSITIVE_KEYS) | {'signature', 'sha256check'}
+        return {
+            key: ('***' if key in masked_keys and value else value)
+            for key, value in (payload or {}).items()
+        }
 
     # =========================================================================
     # CRUD METHODS
@@ -530,6 +616,11 @@ class PaymentProvider(models.Model):
         """
         self.ensure_one()
 
+        secret = self.sudo().viabill_secret_key or ''
+        # Without a configured secret the signature would be computable by anyone.
+        if not secret or not isinstance(received_signature, str) or not received_signature:
+            return False
+
         raw = const.CALLBACK_SIGNATURE_FORMAT.format(
             transaction=transaction,
             order_number=order_number,
@@ -537,12 +628,13 @@ class PaymentProvider(models.Model):
             currency=currency,
             status=status,
             time=time,
-            secret=self.viabill_secret_key or '',
+            secret=secret,
         )
 
         expected = hashlib.sha256(raw.encode('utf-8')).hexdigest()
 
-        return expected == received_signature
+        # Constant-time comparison.
+        return hmac.compare_digest(expected, received_signature.strip().lower())
 
     def _viabill_call_api(self, method, endpoint, payload=None):
         """Make a server-side JSON API call to ViaBill and return the parsed response.
@@ -579,7 +671,7 @@ class PaymentProvider(models.Model):
         self._viabill_debug_log(
             'API {} {} \u2192 HTTP {} | payload={} | response={}'.format(
                 method, endpoint, resp.status_code,
-                json.dumps(payload or {}),
+                json.dumps(self._viabill_mask_payload(payload)),
                 resp.text[:500],
             )
         )
@@ -610,8 +702,10 @@ class PaymentProvider(models.Model):
     # =========================================================================
 
     def action_viabill_clear_debug_log(self):
-        """Clear the ViaBill debug log."""
+        """Clear the ViaBill debug log (system administrators only)."""
         self.ensure_one()
+        if not self.env.user.has_group('base.group_system'):
+            raise AccessError(_("Only administrators can clear the ViaBill debug log."))
         self.sudo().write({'viabill_debug_log': False})
         return True
 

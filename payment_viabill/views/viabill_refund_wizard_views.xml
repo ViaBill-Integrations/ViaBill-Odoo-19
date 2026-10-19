@@ -26,8 +26,7 @@
                 <div role="alert"
                      class="alert alert-warning mb-2"
                      invisible="is_amount_valid">
-                    <strong>Warning!</strong> The refund amount must be greater than zero
-                    and must not exceed
+                    <strong>Warning!</strong> The refund amount must be greater than zero and must not exceed
                     <field name="available_amount" class="oe_inline" widget="monetary"/>.
                 </div>
 

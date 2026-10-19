@@ -1,7 +1,7 @@
 # Copyright 2026 ViaBill A/S
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 
 
 class ViabillRefundWizard(models.TransientModel):
@@ -103,6 +103,13 @@ class ViabillRefundWizard(models.TransientModel):
     def action_refund(self):
         """Submit the refund request to ViaBill for the specified amount."""
         self.ensure_one()
+        # The refund is sent with superuser rights below, so check here that the
+        # user may refund payments and that this is a captured ViaBill payment.
+        if not self.env.user.has_group('account.group_account_invoice'):
+            raise AccessError(_("You are not allowed to refund ViaBill payments."))
+        tx = self.transaction_id
+        if tx.provider_code != 'viabill' or tx.state != 'done':
+            raise ValidationError(_("Only captured ViaBill payments can be refunded."))
         if not self.is_amount_valid:
             raise ValidationError(_(
                 "The refund amount must be greater than zero and not exceed %(max)s.",

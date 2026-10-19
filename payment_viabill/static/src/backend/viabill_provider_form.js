@@ -23,7 +23,7 @@ import { onMounted } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { FormController } from "@web/views/form/form_controller";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+//  Helpers ──────────────────────────────────────────────────────────────────
 
 function showAuthMessage(message, type) {
     const el = document.getElementById('viabill_auth_message');
@@ -62,7 +62,7 @@ function jsonRpc(url, params) {
     });
 }
 
-// ── Login handler ─────────────────────────────────────────────────────────────
+//  Login handler ─────────────────────────────────────────────────────────────
 
 async function handleLogin(event) {
     event.preventDefault();
@@ -106,7 +106,7 @@ async function handleLogin(event) {
     }
 }
 
-// ── Register handler ──────────────────────────────────────────────────────────
+//  Register handler ──────────────────────────────────────────────────────────
 
 async function handleRegister(event) {
     event.preventDefault();
@@ -164,7 +164,7 @@ async function handleRegister(event) {
     }
 }
 
-// ── Attach via event delegation on document ───────────────────────────────────
+//  Attach via event delegation on document ───────────────────────────────────
 
 document.addEventListener('click', function(event) {
     const target = event.target;

@@ -49,3 +49,6 @@ SENSITIVE_KEYS = ['secret', 'apikey', 'viabill_secret_key', 'viabill_api_key', '
 
 # Default payment method codes for ViaBill
 DEFAULT_PAYMENT_METHOD_CODES = ['viabill']
+
+# ViaBill online signup form for merchants without account credentials
+VIABILL_SIGNUP_URL = 'https://portal.viabill.com/signup'

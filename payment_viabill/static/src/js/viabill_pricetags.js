@@ -34,7 +34,7 @@
 (function () {
     'use strict';
 
-    // ── 1. Read the global config element ────────────────────────────────────
+    //  1. Read the global config element ────────────────────────────────────
 
     var configEl = document.getElementById('o_viabill_pricetag_config');
     if (!configEl) {
@@ -51,14 +51,14 @@
         return;
     }
 
-    // ── 2. Detect the current page type ──────────────────────────────────────
+    //  2. Detect the current page type ──────────────────────────────────────
 
     var path = window.location.pathname;
 
     var isCheckout = /\/shop\/(checkout|payment|confirm_order)/.test(path);
     var isCart     = !isCheckout && /\/shop\/cart/.test(path);
 
-    // ── 3. Show/hide the cart and checkout pricetag divs ─────────────────────
+    //  3. Show/hide the cart and checkout pricetag divs ─────────────────────
 
     var cartEl     = document.getElementById('o_viabill_pricetag_cart');
     var checkoutEl = document.getElementById('o_viabill_pricetag_checkout');
@@ -73,7 +73,7 @@
         checkoutEl.style.display = (isCheckout && enableCheckout) ? '' : 'none';
     }
 
-    // ── 4. Check whether there is anything to render on this page ────────────
+    //  4. Check whether there is anything to render on this page ────────────
 
     var hasProductTag  = enableProduct  && document.querySelector('.viabill-pricetag[data-view="product"]');
     var hasCartTag     = isCart     && enableCart     && cartEl     && cartEl.style.display     !== 'none';
@@ -83,7 +83,7 @@
         return;
     }
 
-    // ── 5. Load the ViaBill PriceTag script ──────────────────────────────────
+    //  5. Load the ViaBill PriceTag script ──────────────────────────────────
 
     if (document.querySelector('script[data-viabill-pricetag-loaded]')) {
         return; // Already loaded (e.g. by a previous navigation in an SPA).

@@ -6,8 +6,10 @@
         <field name="model">payment.provider</field>
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
+            <!-- Keep each translatable text on one line: Odoo uses it verbatim,
+                 including line breaks and indentation, as the translation term. -->
 
-            <!-- ── ACCOUNT CREDENTIALS PANEL (before the credentials group) ── -->
+            <!--  ACCOUNT CREDENTIALS PANEL (before the credentials group)  -->
             <group name="provider_credentials" position="before">
                 <div
                     name="viabill_auth_panel"
@@ -17,27 +19,21 @@
                     <!-- Credentials missing: instruct manual entry -->
                     <div invisible="viabill_api_key">
                         <div class="alert alert-info mb-3" role="alert">
-                            <strong>ViaBill Account Credentials.</strong>
-                            Enter your ViaBill API Key, Secret Key and PriceTag Script in the
-                            Credentials section below. You can find these values in your
-                            ViaBill merchant account. All three values are required for the
-                            payment gateway and the PriceTags to work.
+                            <strong>ViaBill Account Credentials.</strong> Enter your ViaBill API Key, Secret Key and PriceTag Script in the Credentials section below. You can find these values in your ViaBill merchant account. All three values are required for the payment gateway and the PriceTags to work.
                         </div>
                     </div>
 
                     <!-- Credentials configured -->
                     <div invisible="not viabill_api_key">
                         <div class="alert alert-success mb-0" role="alert">
-                            <strong>ViaBill account credentials are configured.</strong>
-                            You can update the API Key, Secret Key and PriceTag Script in the
-                            Credentials section below at any time.
+                            <strong>ViaBill account credentials are configured.</strong> You can update the API Key, Secret Key and PriceTag Script in the Credentials section below at any time.
                         </div>
                     </div>
 
                 </div>
             </group>
 
-            <!-- ── CREDENTIALS (inside the existing Credentials tab group) ── -->
+            <!--  CREDENTIALS (inside the existing Credentials tab group)  -->
             <group name="provider_credentials" position="inside">
                 <group invisible="code != 'viabill'" name="viabill_credentials">
                     <field
@@ -56,10 +52,26 @@
                         widget="text"
                         placeholder="&lt;script&gt;(function(){{...}})();&lt;/script&gt;"
                     />
+                    <!-- Point merchants without credentials to the ViaBill online signup form. -->
+                    <div
+                        name="viabill_signup_note"
+                        class="alert alert-info mt-2 mb-0"
+                        role="alert"
+                        colspan="2"
+                    >
+                        <p class="fw-bold mb-1">No ViaBill account credentials yet?</p>
+                        <p class="mb-1">Fill in the ViaBill online signup form to get your API key, secret key and PriceTag script.</p>
+                        <button
+                            name="action_viabill_open_signup"
+                            type="object"
+                            string="Go to the ViaBill signup form"
+                            class="btn btn-link p-0"
+                        />
+                    </div>
                 </group>
             </group>
 
-            <!-- ── CONFIGURATION TAB: Transaction type + PriceTags ── -->
+            <!--  CONFIGURATION TAB: Transaction type + PriceTags  -->
             <group name="provider_config" position="inside">
 
                 <!-- Transaction type + order states -->
@@ -149,11 +161,7 @@
                         placeholder="// runs after the ViaBill script loads"
                     />
                     <div class="text-muted" colspan="2" invisible="not (viabill_pricetag_product or viabill_pricetag_cart or viabill_pricetag_checkout)">
-                        <small>
-                            The PriceTag Script (in the Credentials tab) must be set for
-                            the widget to appear. Paste the snippet from your ViaBill
-                            merchant account into the Credentials section.
-                        </small>
+                        <small>The PriceTag Script (in the Credentials tab) must be set for the widget to appear. Paste the snippet from your ViaBill merchant account into the Credentials section.</small>
                     </div>
                 </group>
 
@@ -183,6 +191,7 @@
                     string="Troubleshooting"
                     name="viabill_troubleshooting"
                     invisible="code != 'viabill'"
+                    groups="base.group_system"
                 >
                     <group string="Debug Settings" name="viabill_debug_settings">
                         <field
@@ -190,11 +199,7 @@
                             string="Enable Debug"
                         />
                         <div class="text-muted" colspan="2">
-                            <small>
-                                When enabled, ViaBill API requests and responses are
-                                logged below (last 50 entries). Disable in production
-                                to avoid storing sensitive data.
-                            </small>
+                            <small>When enabled, ViaBill API requests and responses are logged below (last 50 entries). Disable in production to avoid storing sensitive data.</small>
                         </div>
                     </group>
                     <group string="Debug Log" name="viabill_debug_log_group">

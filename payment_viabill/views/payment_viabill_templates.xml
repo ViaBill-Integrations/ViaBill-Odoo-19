@@ -75,8 +75,8 @@
                 <t t-set="country_code"      t-value="country_override if country_override else (company_obj.country_id.code or 'DK').lower()"/>
                 <t t-set="lang_override"     t-value="viabill_provider.viabill_pricetag_language or ''"/>
                 <t t-set="lang_code"         t-value="lang_override if lang_override else (request.lang.code or 'en_US')[:2].lower()"/>
-                <t t-set="custom_css"        t-value="viabill_provider.viabill_pricetag_custom_css or ''"/>
-                <t t-set="custom_js"         t-value="viabill_provider.viabill_pricetag_custom_js or ''"/>
+                <t t-set="custom_css"        t-value="viabill_provider.viabill_get_custom_css_markup()"/>
+                <t t-set="custom_js"         t-value="viabill_provider.viabill_get_custom_js_markup()"/>
 
                 <!-- Config element read by viabill_pricetags.js -->
                 <div

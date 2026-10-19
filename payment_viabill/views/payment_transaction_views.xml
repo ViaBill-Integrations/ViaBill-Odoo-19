@@ -17,6 +17,7 @@
                     name="action_refund"
                     string="Refund Transaction"
                     invisible="state != 'done' or provider_code != 'viabill'"
+                    groups="account.group_account_invoice"
                     confirm="Are you sure you want to refund this transaction? This action cannot be undone."
                 />
             </xpath>
