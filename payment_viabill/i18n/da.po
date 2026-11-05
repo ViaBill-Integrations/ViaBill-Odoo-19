@@ -284,16 +284,19 @@ msgstr "Automatisk registrering (brug browserens sprog)"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__en
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__en
 msgid "English"
 msgstr "Engelsk"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__es
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__es
 msgid "Spanish"
 msgstr "Spansk"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__da
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__da
 msgid "Danish"
 msgstr "Dansk"
 
@@ -709,3 +712,79 @@ msgstr "Refunder"
 #: model_terms:ir.ui.view,arch_db:payment_viabill.viabill_refund_wizard_view_form
 msgid "Close"
 msgstr "Luk"
+
+#. module: payment_viabill
+#: code:addons/payment_viabill/models/payment_provider.py:0
+msgid "Warning! Borrow responsibly - it costs money."
+msgstr "Advarsel! Lån med omtanke - det koster penge."
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Legal Note"
+msgstr "Juridisk meddelelse"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "The legal note is a short information text shown to customers at checkout when ViaBill is selected as the payment method, such as a warning that borrowing money costs money."
+msgstr "Den juridiske meddelelse er en kort informationstekst, der vises for kunderne ved kassen, når ViaBill er valgt som betalingsmetode, f.eks. en advarsel om, at det koster penge at låne penge."
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Enabled"
+msgstr "Aktiveret"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Text"
+msgstr "Tekst"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Language"
+msgstr "Sprog"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_default
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Default Legal Note"
+msgstr "Standardmeddelelse"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_enabled
+msgid "Show Legal Note at Checkout"
+msgstr "Vis juridisk meddelelse ved kassen"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_text
+msgid "Legal Note Text"
+msgstr "Tekst til juridisk meddelelse"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_language
+msgid "Legal Note Language"
+msgstr "Sprog for juridisk meddelelse"
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_enabled
+msgid "Show the legal note to customers at checkout when ViaBill is selected."
+msgstr "Vis den juridiske meddelelse for kunderne ved kassen, når ViaBill er valgt."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_text
+msgid "Leave empty to use the default legal note, in the language selected below."
+msgstr "Lad feltet være tomt for at bruge standardmeddelelsen på det sprog, der er valgt nedenfor."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_language
+msgid "Language of the default legal note. \"Auto\" uses the language of the customer."
+msgstr "Sproget for standardmeddelelsen. \"Automatisk\" bruger kundens sprog."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_default
+msgid "The legal note shown when the text above is empty."
+msgstr "Den juridiske meddelelse, der vises, når teksten ovenfor er tom."
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__auto
+msgid "Auto"
+msgstr "Automatisk"

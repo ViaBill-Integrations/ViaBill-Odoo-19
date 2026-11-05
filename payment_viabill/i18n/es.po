@@ -289,16 +289,19 @@ msgstr "Detección automática (usar el idioma del navegador)"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__en
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__en
 msgid "English"
 msgstr "Inglés"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__es
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__es
 msgid "Spanish"
 msgstr "Español"
 
 #. module: payment_viabill
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_pricetag_language__da
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__da
 msgid "Danish"
 msgstr "Danés"
 
@@ -722,3 +725,79 @@ msgstr "Reembolsar"
 #: model_terms:ir.ui.view,arch_db:payment_viabill.viabill_refund_wizard_view_form
 msgid "Close"
 msgstr "Cerrar"
+
+#. module: payment_viabill
+#: code:addons/payment_viabill/models/payment_provider.py:0
+msgid "Warning! Borrow responsibly - it costs money."
+msgstr "¡Advertencia! Pide prestado con responsabilidad - cuesta dinero."
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Legal Note"
+msgstr "Aviso legal"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "The legal note is a short information text shown to customers at checkout when ViaBill is selected as the payment method, such as a warning that borrowing money costs money."
+msgstr "El aviso legal es un breve texto informativo que se muestra a los clientes en la página de pago cuando se selecciona ViaBill como método de pago, por ejemplo, una advertencia de que pedir dinero prestado cuesta dinero."
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Enabled"
+msgstr "Activado"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Text"
+msgstr "Texto"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Language"
+msgstr "Idioma"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_default
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Default Legal Note"
+msgstr "Aviso legal predeterminado"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_enabled
+msgid "Show Legal Note at Checkout"
+msgstr "Mostrar el aviso legal en la página de pago"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_text
+msgid "Legal Note Text"
+msgstr "Texto del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_language
+msgid "Legal Note Language"
+msgstr "Idioma del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_enabled
+msgid "Show the legal note to customers at checkout when ViaBill is selected."
+msgstr "Mostrar el aviso legal a los clientes en la página de pago cuando se selecciona ViaBill."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_text
+msgid "Leave empty to use the default legal note, in the language selected below."
+msgstr "Déjelo vacío para usar el aviso legal predeterminado, en el idioma seleccionado abajo."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_language
+msgid "Language of the default legal note. \"Auto\" uses the language of the customer."
+msgstr "Idioma del aviso legal predeterminado. \"Automático\" usa el idioma del cliente."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_default
+msgid "The legal note shown when the text above is empty."
+msgstr "El aviso legal que se muestra cuando el texto de arriba está vacío."
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__auto
+msgid "Auto"
+msgstr "Automático"

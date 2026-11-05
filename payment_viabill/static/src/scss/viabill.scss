@@ -77,3 +77,12 @@
         font-size: 0.8rem;
     }
 }
+
+// ─── Legal Note ───────────────────────────────────────────────────────────────
+
+// Legal note (credit warning) in the inline form of the ViaBill payment method,
+// see views/payment_viabill_templates.xml. Kept unnested so themes can override it.
+.viabill-legal-note {
+    font-weight: 600;
+    margin: 0.5em 0;
+}

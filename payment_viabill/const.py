@@ -52,3 +52,13 @@ DEFAULT_PAYMENT_METHOD_CODES = ['viabill']
 
 # ViaBill online signup form for merchants without account credentials
 VIABILL_SIGNUP_URL = 'https://portal.viabill.com/signup'
+
+# Legal note (credit warning) shown next to ViaBill at the checkout.
+# The default text must be identical to the msgid in the i18n/*.po files.
+LEGAL_NOTE_DEFAULT_TEXT = 'Warning! Borrow responsibly - it costs money.'
+
+# Languages of the "Legal Note Language" setting that have their own .po file.
+LEGAL_NOTE_PO_FILES = {
+    'da': 'da.po',
+    'es': 'es.po',
+}

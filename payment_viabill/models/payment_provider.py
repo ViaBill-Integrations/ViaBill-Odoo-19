@@ -1,10 +1,13 @@
 # Copyright 2026 ViaBill A/S
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
+import ast
+import functools
 import hashlib
 import hmac
 import json
 import logging
+import os
 from datetime import datetime
 from urllib.parse import quote, urlencode
 
@@ -13,6 +16,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
+from odoo.tools import html_sanitize
 
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_viabill import const
@@ -21,6 +25,42 @@ _logger = get_payment_logger(__name__, sensitive_keys=const.SENSITIVE_KEYS)
 
 # User-Agent sent with all ViaBill API requests.
 _VIABILL_USER_AGENT = 'ViaBill-Odoo/1.0'
+
+
+@functools.lru_cache(maxsize=None)
+def _viabill_read_po_file(filename):
+    """Return the translations of one of the module's i18n/*.po files.
+
+    Only plain msgid/msgstr entries are read (with continuation lines), which
+    is all the legal note needs.
+
+    :param str filename: The .po file name, e.g. 'da.po'.
+    :return: The translations, keyed by source text.
+    :rtype: dict
+    """
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'i18n', filename)
+    translations = {}
+    if not os.path.isfile(path):
+        return translations
+
+    entry, key = {}, None
+    with open(path, encoding='utf-8') as po_file:
+        for line in list(po_file) + ['']:
+            line = line.strip()
+            if line.startswith(('msgid ', 'msgstr ')):
+                key, _space, value = line.partition(' ')
+                if key == 'msgid' and entry.get('msgid') and entry.get('msgstr'):
+                    translations[entry['msgid']] = entry['msgstr']
+                if key == 'msgid':
+                    entry = {}
+                entry[key] = ast.literal_eval(value)
+            elif line.startswith('"') and key:
+                entry[key] += ast.literal_eval(line)
+            elif not line.startswith('"'):
+                key = None
+    if entry.get('msgid') and entry.get('msgstr'):
+        translations[entry['msgid']] = entry['msgstr']
+    return translations
 
 
 class PaymentProvider(models.Model):
@@ -197,6 +237,36 @@ class PaymentProvider(models.Model):
         ),
     )
 
+    #  Legal note (credit warning) at the checkout ───────────────────────────
+
+    viabill_legal_note_enabled = fields.Boolean(
+        string="Show Legal Note at Checkout",
+        default=True,
+        help="Show the legal note to customers at checkout when ViaBill is selected.",
+    )
+    viabill_legal_note_text = fields.Text(
+        string="Legal Note Text",
+        translate=True,
+        help="Leave empty to use the default legal note, in the language selected below.",
+    )
+    viabill_legal_note_language = fields.Selection(
+        selection=[
+            ('auto', "Auto"),
+            ('en', "English"),
+            ('da', "Danish"),
+            ('es', "Spanish"),
+        ],
+        string="Legal Note Language",
+        default='auto',
+        required=True,
+        help='Language of the default legal note. "Auto" uses the language of the customer.',
+    )
+    viabill_legal_note_default = fields.Char(
+        string="Default Legal Note",
+        compute='_compute_viabill_legal_note_default',
+        help="The legal note shown when the text above is empty.",
+    )
+
     #  Order state after authorize / capture ─────────────────────────────────
 
     viabill_order_state_after_authorize = fields.Selection(
@@ -356,6 +426,59 @@ class PaymentProvider(models.Model):
         self.ensure_one()
         js = (self.sudo().viabill_pricetag_custom_js or '').replace('</', '<\\/')
         return Markup(js)
+
+    # =========================================================================
+    # LEGAL NOTE (frontend)
+    # =========================================================================
+
+    @api.depends('viabill_legal_note_language')
+    @api.depends_context('lang')
+    def _compute_viabill_legal_note_default(self):
+        for provider in self:
+            provider.viabill_legal_note_default = provider._viabill_get_legal_note_default_text(
+                provider.viabill_legal_note_language
+            )
+
+    def _viabill_get_legal_note(self):
+        """Return the legal note (credit warning) to show at the checkout.
+
+        The merchant's own text (translatable) if set, otherwise the default
+        text in the configured language.
+
+        :return: The sanitized HTML, or an empty string if the legal note is
+                 switched off.
+        :rtype: markupsafe.Markup | str
+        """
+        self.ensure_one()
+        provider = self.sudo()
+        if not provider.viabill_legal_note_enabled:
+            return ''
+        text = (provider.viabill_legal_note_text or '').strip()
+        if not text:
+            text = provider._viabill_get_legal_note_default_text(provider.viabill_legal_note_language)
+        return Markup(html_sanitize(text))
+
+    def _viabill_get_legal_note_default_text(self, language='auto'):
+        """Return the default legal note in the given language.
+
+        "auto" uses the language of the current context. The module's own
+        .po file is read directly, so the language does not have to be
+        installed; other languages are translated through Odoo as usual.
+
+        :param str language: 'auto', 'en', 'da' or 'es'.
+        :return: The default legal note.
+        :rtype: str
+        """
+        if language == 'auto' or not language:
+            language = (self.env.lang or 'en_US')[:2]
+        if language == 'en':
+            return const.LEGAL_NOTE_DEFAULT_TEXT
+        po_file = const.LEGAL_NOTE_PO_FILES.get(language)
+        if po_file:
+            translation = _viabill_read_po_file(po_file).get(const.LEGAL_NOTE_DEFAULT_TEXT)
+            if translation:
+                return translation
+        return _("Warning! Borrow responsibly - it costs money.")
 
     # =========================================================================
     # SIGNUP

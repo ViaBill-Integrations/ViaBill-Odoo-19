@@ -165,6 +165,38 @@
                     </div>
                 </group>
 
+                <!-- Legal note (credit warning) at the checkout -->
+                <group
+                    string="Legal Note"
+                    name="viabill_legal_note"
+                    invisible="code != 'viabill'"
+                >
+                    <div class="alert alert-info mb-3" role="alert" colspan="2">
+                        The legal note is a short information text shown to customers at checkout when ViaBill is selected as the payment method, such as a warning that borrowing money costs money.
+                    </div>
+                    <field
+                        name="viabill_legal_note_enabled"
+                        string="Enabled"
+                    />
+                    <field
+                        name="viabill_legal_note_text"
+                        string="Text"
+                        widget="text"
+                        invisible="not viabill_legal_note_enabled"
+                    />
+                    <field
+                        name="viabill_legal_note_language"
+                        string="Language"
+                        widget="selection"
+                        invisible="not viabill_legal_note_enabled"
+                    />
+                    <field
+                        name="viabill_legal_note_default"
+                        string="Default Legal Note"
+                        invisible="not viabill_legal_note_enabled"
+                    />
+                </group>
+
             </group>
 
         </field>

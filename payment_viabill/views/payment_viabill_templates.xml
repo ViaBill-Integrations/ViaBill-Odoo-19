@@ -37,6 +37,27 @@
     </template>
 
     <!--
+        ViaBill legal note (credit warning) in the payment form.
+
+        Added to the inline form of the ViaBill payment method, which Odoo only
+        shows while that payment method is selected. See
+        payment.provider._viabill_get_legal_note() for the text; styled in
+        static/src/scss/viabill.scss (.viabill-legal-note).
+    -->
+    <template
+        id="payment_method_form_legal_note"
+        name="ViaBill: Legal Note in Payment Form"
+        inherit_id="payment.method_form"
+    >
+        <xpath expr="//div[@name='o_payment_inline_form']" position="inside">
+            <t t-if="provider_sudo.code == 'viabill'">
+                <t t-set="viabill_legal_note" t-value="provider_sudo._viabill_get_legal_note()"/>
+                <div t-if="viabill_legal_note" class="viabill-legal-note" t-out="viabill_legal_note"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!--
         ViaBill PriceTags — global config element + custom CSS/JS injection.
 
         Injected at the end of #wrapwrap on every frontend page when a non-disabled
