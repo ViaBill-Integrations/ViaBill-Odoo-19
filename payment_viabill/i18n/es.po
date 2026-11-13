@@ -769,6 +769,7 @@ msgstr "Mostrar el aviso legal en la página de pago"
 
 #. module: payment_viabill
 #: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_text
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_default
 msgid "Legal Note Text"
 msgstr "Texto del aviso legal"
 
@@ -801,3 +802,177 @@ msgstr "El aviso legal que se muestra cuando el texto de arriba está vacío."
 #: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_language__auto
 msgid "Auto"
 msgstr "Automático"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_font_size
+msgid "Legal Note Font Size"
+msgstr "Tamaño de fuente del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_font_style
+msgid "Legal Note Font Style"
+msgstr "Estilo de fuente del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_color
+msgid "Legal Note Text Color"
+msgstr "Color del texto del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_align
+msgid "Legal Note Text Alignment"
+msgstr "Alineación del texto del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_extra_css
+msgid "Legal Note Extra CSS"
+msgstr "CSS adicional del aviso legal"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Font size"
+msgstr "Tamaño de fuente"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Font style"
+msgstr "Estilo de fuente"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Text color"
+msgstr "Color del texto"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Text alignment"
+msgstr "Alineación del texto"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Extra CSS"
+msgstr "CSS adicional"
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_font_size
+msgid "Font size of the legal note, e.g. 14px, 0.9em or 90%. Leave empty to use the font size of your theme."
+msgstr "Tamaño de fuente del aviso legal, p. ej. 14px, 0.9em o 90%. Déjelo vacío para usar el tamaño de fuente de su tema."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_color
+msgid "Color code of the legal note text, e.g. #cc0000. Leave empty to use the text color of your theme."
+msgstr "Código de color del texto del aviso legal, p. ej. #cc0000. Déjelo vacío para usar el color de texto de su tema."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_extra_css
+msgid "Optional CSS declarations applied to the legal note box, separated by semicolons (no selectors or braces), e.g. padding: 8px 12px; background-color: #fff8e1; border-left: 3px solid #f0b849; They are applied after the options above, so they can also override them."
+msgstr "Declaraciones CSS opcionales que se aplican al cuadro del aviso legal, separadas por punto y coma (sin selectores ni llaves), p. ej. padding: 8px 12px; background-color: #fff8e1; border-left: 3px solid #f0b849; Se aplican después de las opciones anteriores, por lo que también pueden sobrescribirlas."
+
+#. module: payment_viabill
+#. odoo-python
+#: code:addons/payment_viabill/models/payment_provider.py:0
+msgid "The font size of the legal note is not valid. Use a value such as 14px, 0.9em or 90%."
+msgstr "El tamaño de fuente del aviso legal no es válido. Use un valor como 14px, 0.9em o 90%."
+
+#. module: payment_viabill
+#. odoo-python
+#: code:addons/payment_viabill/models/payment_provider.py:0
+msgid "The text color of the legal note is not valid. Use a color code such as #cc0000."
+msgstr "El color del texto del aviso legal no es válido. Use un código de color como #cc0000."
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_font_style__normal
+msgid "Normal"
+msgstr "Normal"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_font_style__bold
+msgid "Bold"
+msgstr "Negrita"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_font_style__italic
+msgid "Italic"
+msgstr "Cursiva"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_font_style__bold-italic
+msgid "Bold italic"
+msgstr "Negrita cursiva"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_align__default
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Theme default"
+msgstr "Predeterminado del tema"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_align__left
+msgid "Left"
+msgstr "Izquierda"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_align__center
+msgid "Center"
+msgstr "Centro"
+
+#. module: payment_viabill
+#: model:ir.model.fields.selection,name:payment_viabill.selection__payment_provider__viabill_legal_note_align__right
+msgid "Right"
+msgstr "Derecha"
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_default
+msgid "The legal note shown at checkout, in the language selected below."
+msgstr "El aviso legal que se muestra en la página de pago, en el idioma seleccionado abajo."
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_margin_top
+msgid "Legal Note Margin Top"
+msgstr "Margen superior del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_margin_bottom
+msgid "Legal Note Margin Bottom"
+msgstr "Margen inferior del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,field_description:payment_viabill.field_payment_provider__viabill_legal_note_margin_left
+msgid "Legal Note Margin Left"
+msgstr "Margen izquierdo del aviso legal"
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_margin_top
+msgid "Space above the legal note, e.g. 4px or 0.5em. A negative value moves it closer to the payment method name."
+msgstr "Espacio encima del aviso legal, p. ej. 4px o 0.5em. Un valor negativo lo acerca al nombre del método de pago."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_margin_bottom
+msgid "Space below the legal note, e.g. 4px or 0.5em."
+msgstr "Espacio debajo del aviso legal, p. ej. 4px o 0.5em."
+
+#. module: payment_viabill
+#: model:ir.model.fields,help:payment_viabill.field_payment_provider__viabill_legal_note_margin_left
+msgid "Space to the left of the legal note, e.g. 4px. A negative value moves it to the left."
+msgstr "Espacio a la izquierda del aviso legal, p. ej. 4px. Un valor negativo lo mueve a la izquierda."
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Margin top"
+msgstr "Margen superior"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Margin bottom"
+msgstr "Margen inferior"
+
+#. module: payment_viabill
+#: model_terms:ir.ui.view,arch_db:payment_viabill.payment_provider_form
+msgid "Margin left"
+msgstr "Margen izquierdo"
+
+#. module: payment_viabill
+#. odoo-python
+#: code:addons/payment_viabill/models/payment_provider.py:0
+msgid "The margin of the legal note is not valid. Use a value such as 4px, -12px or 0.5em."
+msgstr "El margen del aviso legal no es válido. Use un valor como 4px, -12px o 0.5em."

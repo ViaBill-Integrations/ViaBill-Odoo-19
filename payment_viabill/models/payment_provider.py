@@ -8,6 +8,7 @@ import hmac
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from urllib.parse import quote, urlencode
 
@@ -15,7 +16,7 @@ import requests
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import html_sanitize
 
 from odoo.addons.payment.logging import get_payment_logger
@@ -61,6 +62,70 @@ def _viabill_read_po_file(filename):
     if entry.get('msgid') and entry.get('msgstr'):
         translations[entry['msgid']] = entry['msgstr']
     return translations
+
+
+def _viabill_sanitize_font_size(value):
+    """Return a valid CSS font size, or an empty string.
+
+    A plain number is taken as pixels.
+
+    :param str value: The value entered by the merchant, e.g. '14px' or '0.9em'.
+    :rtype: str
+    """
+    value = (value or '').strip().lower().replace(',', '.')
+    match = re.fullmatch(r'([0-9]+(?:\.[0-9]+)?|\.[0-9]+)\s*(px|em|rem|pt|%)?', value)
+    if not match or float(match.group(1)) <= 0:
+        return ''
+    return match.group(1) + (match.group(2) or 'px')
+
+
+def _viabill_sanitize_margin(value):
+    """Return a valid CSS margin, or an empty string.
+
+    A plain number is taken as pixels. Negative values are allowed, e.g. to
+    move the legal note closer to the payment method name.
+
+    :param str value: The value entered by the merchant, e.g. '4px' or '-12'.
+    :rtype: str
+    """
+    value = (value or '').strip().lower().replace(',', '.')
+    match = re.fullmatch(r'(-?)([0-9]+(?:\.[0-9]+)?|\.[0-9]+)\s*(px|em|rem|pt|%)?', value)
+    if not match:
+        return ''
+    if float(match.group(2)) == 0:
+        return '0px'
+    return match.group(1) + match.group(2) + (match.group(3) or 'px')
+
+
+def _viabill_sanitize_color(value):
+    """Return a valid CSS color (hex or a color name), or an empty string.
+
+    :param str value: The value entered by the merchant, e.g. '#cc0000'.
+    :rtype: str
+    """
+    value = (value or '').strip()
+    if re.fullmatch(r'#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|[a-zA-Z]{3,20}', value):
+        return value
+    return ''
+
+
+def _viabill_sanitize_extra_css(css):
+    """Return the extra CSS declarations in a form that is safe to print inside
+    a style attribute.
+
+    Only declarations (e.g. "padding: 8px; border: 1px solid #ccc") are
+    supported, so anything that could open a new rule or a tag is removed.
+
+    :param str css: The value entered by the merchant.
+    :rtype: str
+    """
+    css = css or ''
+    css = re.sub(r'<[^>]*>', '', css)
+    css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)
+    css = re.sub(r'[{}<>\\]', '', css)
+    css = re.sub(r'expression\s*\(|javascript\s*:|@import', '', css, flags=re.I)
+    css = re.sub(r'\s+', ' ', css)
+    return css.strip(' ;')
 
 
 class PaymentProvider(models.Model):
@@ -238,17 +303,8 @@ class PaymentProvider(models.Model):
     )
 
     #  Legal note (credit warning) at the checkout ───────────────────────────
+    #  It is always shown, with the default text; only its look can be changed.
 
-    viabill_legal_note_enabled = fields.Boolean(
-        string="Show Legal Note at Checkout",
-        default=True,
-        help="Show the legal note to customers at checkout when ViaBill is selected.",
-    )
-    viabill_legal_note_text = fields.Text(
-        string="Legal Note Text",
-        translate=True,
-        help="Leave empty to use the default legal note, in the language selected below.",
-    )
     viabill_legal_note_language = fields.Selection(
         selection=[
             ('auto', "Auto"),
@@ -262,9 +318,77 @@ class PaymentProvider(models.Model):
         help='Language of the default legal note. "Auto" uses the language of the customer.',
     )
     viabill_legal_note_default = fields.Char(
-        string="Default Legal Note",
+        string="Legal Note Text",
         compute='_compute_viabill_legal_note_default',
-        help="The legal note shown when the text above is empty.",
+        help="The legal note shown at checkout, in the language selected below.",
+    )
+
+    # Styling of the legal note, see _viabill_get_legal_note_style().
+    viabill_legal_note_font_size = fields.Char(
+        string="Legal Note Font Size",
+        help=(
+            "Font size of the legal note, e.g. 14px, 0.9em or 90%. "
+            "Leave empty to use the font size of your theme."
+        ),
+    )
+    viabill_legal_note_font_style = fields.Selection(
+        selection=[
+            ('normal', "Normal"),
+            ('bold', "Bold"),
+            ('italic', "Italic"),
+            ('bold-italic', "Bold italic"),
+        ],
+        string="Legal Note Font Style",
+        # The same as the payment method name.
+        default='normal',
+        required=True,
+    )
+    viabill_legal_note_color = fields.Char(
+        string="Legal Note Text Color",
+        help=(
+            "Color code of the legal note text, e.g. #cc0000. "
+            "Leave empty to use the text color of your theme."
+        ),
+    )
+    viabill_legal_note_align = fields.Selection(
+        selection=[
+            ('default', "Theme default"),
+            ('left', "Left"),
+            ('center', "Center"),
+            ('right', "Right"),
+        ],
+        string="Legal Note Text Alignment",
+        default='default',
+        required=True,
+    )
+    viabill_legal_note_extra_css = fields.Text(
+        string="Legal Note Extra CSS",
+        help=(
+            "Optional CSS declarations applied to the legal note box, separated by "
+            "semicolons (no selectors or braces), e.g. padding: 8px 12px; "
+            "background-color: #fff8e1; border-left: 3px solid #f0b849; They are "
+            "applied after the options above, so they can also override them."
+        ),
+    )
+    # The defaults keep the spacing the legal note always had at the checkout
+    # (0.5em above and below); they are positive, so safe for every theme.
+    viabill_legal_note_margin_top = fields.Char(
+        string="Legal Note Margin Top",
+        default='0.5em',
+        help=(
+            "Space above the legal note, e.g. 4px or 0.5em. "
+            "A negative value moves it closer to the payment method name."
+        ),
+    )
+    viabill_legal_note_margin_bottom = fields.Char(
+        string="Legal Note Margin Bottom",
+        default='0.5em',
+        help="Space below the legal note, e.g. 4px or 0.5em.",
+    )
+    viabill_legal_note_margin_left = fields.Char(
+        string="Legal Note Margin Left",
+        default='0px',
+        help="Space to the left of the legal note, e.g. 4px. A negative value moves it to the left.",
     )
 
     #  Order state after authorize / capture ─────────────────────────────────
@@ -440,23 +564,103 @@ class PaymentProvider(models.Model):
             )
 
     def _viabill_get_legal_note(self):
-        """Return the legal note (credit warning) to show at the checkout.
+        """Return the legal note (credit warning) to show at the checkout: the
+        default text in the configured language.
 
-        The merchant's own text (translatable) if set, otherwise the default
-        text in the configured language.
-
-        :return: The sanitized HTML, or an empty string if the legal note is
-                 switched off.
-        :rtype: markupsafe.Markup | str
+        :return: The sanitized HTML.
+        :rtype: markupsafe.Markup
         """
         self.ensure_one()
         provider = self.sudo()
-        if not provider.viabill_legal_note_enabled:
-            return ''
-        text = (provider.viabill_legal_note_text or '').strip()
-        if not text:
-            text = provider._viabill_get_legal_note_default_text(provider.viabill_legal_note_language)
+        text = provider._viabill_get_legal_note_default_text(provider.viabill_legal_note_language)
         return Markup(html_sanitize(text))
+
+    @api.constrains(
+        'viabill_legal_note_font_size',
+        'viabill_legal_note_color',
+        'viabill_legal_note_margin_top',
+        'viabill_legal_note_margin_bottom',
+        'viabill_legal_note_margin_left',
+    )
+    def _check_viabill_legal_note_style(self):
+        for provider in self:
+            font_size = (provider.viabill_legal_note_font_size or '').strip()
+            if font_size and not _viabill_sanitize_font_size(font_size):
+                raise ValidationError(_(
+                    "The font size of the legal note is not valid. "
+                    "Use a value such as 14px, 0.9em or 90%."
+                ))
+            color = (provider.viabill_legal_note_color or '').strip()
+            if color and not _viabill_sanitize_color(color):
+                raise ValidationError(_(
+                    "The text color of the legal note is not valid. "
+                    "Use a color code such as #cc0000."
+                ))
+            for margin in (
+                provider.viabill_legal_note_margin_top,
+                provider.viabill_legal_note_margin_bottom,
+                provider.viabill_legal_note_margin_left,
+            ):
+                margin = (margin or '').strip()
+                if margin and not _viabill_sanitize_margin(margin):
+                    raise ValidationError(_(
+                        "The margin of the legal note is not valid. "
+                        "Use a value such as 4px, -12px or 0.5em."
+                    ))
+
+    def _viabill_get_legal_note_class(self):
+        """Return the CSS classes of the legal note.
+
+        Without a text color of its own, the legal note uses the muted text
+        color of the theme, like the "Secured by" line of the payment form.
+        Bootstrap's text-muted class overrides inline colors, so it is only
+        added when no text color is set.
+
+        :rtype: str
+        """
+        self.ensure_one()
+        if _viabill_sanitize_color(self.sudo().viabill_legal_note_color):
+            return 'viabill-legal-note'
+        return 'viabill-legal-note text-muted'
+
+    def _viabill_get_legal_note_style(self):
+        """Return the inline style of the legal note, built from the styling
+        settings, e.g. "font-weight:600;color:#cc0000".
+
+        :return: The CSS declarations. Not escaped: QWeb escapes the attribute.
+        :rtype: str
+        """
+        self.ensure_one()
+        provider = self.sudo()
+        declarations = []
+
+        font_size = _viabill_sanitize_font_size(provider.viabill_legal_note_font_size)
+        if font_size:
+            declarations.append('font-size:' + font_size)
+
+        font_style = provider.viabill_legal_note_font_style or 'normal'
+        declarations.append('font-weight:' + ('600' if 'bold' in font_style else 'normal'))
+        declarations.append('font-style:' + ('italic' if 'italic' in font_style else 'normal'))
+
+        color = _viabill_sanitize_color(provider.viabill_legal_note_color)
+        if color:
+            declarations.append('color:' + color)
+
+        if provider.viabill_legal_note_align in ('left', 'center', 'right'):
+            declarations.append('text-align:' + provider.viabill_legal_note_align)
+
+        # An empty or invalid margin means the default of that field.
+        for side in ('top', 'bottom', 'left'):
+            name = 'viabill_legal_note_margin_' + side
+            margin = _viabill_sanitize_margin(provider[name]) or self._fields[name].default(self)
+            declarations.append('margin-' + side + ':' + margin)
+
+        # The extra CSS comes last, so it can override the controls above.
+        extra_css = _viabill_sanitize_extra_css(provider.viabill_legal_note_extra_css)
+        if extra_css:
+            declarations.append(extra_css)
+
+        return ';'.join(declarations)
 
     def _viabill_get_legal_note_default_text(self, language='auto'):
         """Return the default legal note in the given language.

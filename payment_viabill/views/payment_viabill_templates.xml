@@ -42,7 +42,10 @@
         Added to the inline form of the ViaBill payment method, which Odoo only
         shows while that payment method is selected. See
         payment.provider._viabill_get_legal_note() for the text; styled in
-        static/src/scss/viabill.scss (.viabill-legal-note).
+        static/src/scss/viabill.scss (.viabill-legal-note) and by the styling
+        settings of the provider, see _viabill_get_legal_note_style(). Without a
+        text color of its own it uses the muted text color of the theme, see
+        _viabill_get_legal_note_class().
     -->
     <template
         id="payment_method_form_legal_note"
@@ -52,7 +55,12 @@
         <xpath expr="//div[@name='o_payment_inline_form']" position="inside">
             <t t-if="provider_sudo.code == 'viabill'">
                 <t t-set="viabill_legal_note" t-value="provider_sudo._viabill_get_legal_note()"/>
-                <div t-if="viabill_legal_note" class="viabill-legal-note" t-out="viabill_legal_note"/>
+                <div
+                    t-if="viabill_legal_note"
+                    t-att-class="provider_sudo._viabill_get_legal_note_class()"
+                    t-att-style="provider_sudo._viabill_get_legal_note_style()"
+                    t-out="viabill_legal_note"
+                />
             </t>
         </xpath>
     </template>

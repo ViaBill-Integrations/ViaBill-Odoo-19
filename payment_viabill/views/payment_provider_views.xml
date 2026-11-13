@@ -174,26 +174,54 @@
                     <div class="alert alert-info mb-3" role="alert" colspan="2">
                         The legal note is a short information text shown to customers at checkout when ViaBill is selected as the payment method, such as a warning that borrowing money costs money.
                     </div>
+                    <!-- Read only: the legal note in the language selected below -->
                     <field
-                        name="viabill_legal_note_enabled"
-                        string="Enabled"
-                    />
-                    <field
-                        name="viabill_legal_note_text"
+                        name="viabill_legal_note_default"
                         string="Text"
-                        widget="text"
-                        invisible="not viabill_legal_note_enabled"
                     />
                     <field
                         name="viabill_legal_note_language"
                         string="Language"
                         widget="selection"
-                        invisible="not viabill_legal_note_enabled"
+                    />
+                    <!-- Styling of the legal note -->
+                    <field
+                        name="viabill_legal_note_font_size"
+                        string="Font size"
+                        placeholder="Theme default"
                     />
                     <field
-                        name="viabill_legal_note_default"
-                        string="Default Legal Note"
-                        invisible="not viabill_legal_note_enabled"
+                        name="viabill_legal_note_font_style"
+                        string="Font style"
+                        widget="selection"
+                    />
+                    <field
+                        name="viabill_legal_note_color"
+                        string="Text color"
+                        placeholder="Theme default"
+                    />
+                    <field
+                        name="viabill_legal_note_align"
+                        string="Text alignment"
+                        widget="selection"
+                    />
+                    <field
+                        name="viabill_legal_note_margin_top"
+                        string="Margin top"
+                    />
+                    <field
+                        name="viabill_legal_note_margin_bottom"
+                        string="Margin bottom"
+                    />
+                    <field
+                        name="viabill_legal_note_margin_left"
+                        string="Margin left"
+                    />
+                    <field
+                        name="viabill_legal_note_extra_css"
+                        string="Extra CSS"
+                        widget="text"
+                        placeholder="padding: 8px 12px; background-color: #fff8e1; border-left: 3px solid #f0b849;"
                     />
                 </group>
 

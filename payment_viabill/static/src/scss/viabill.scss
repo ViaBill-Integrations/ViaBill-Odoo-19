@@ -82,7 +82,18 @@
 
 // Legal note (credit warning) in the inline form of the ViaBill payment method,
 // see views/payment_viabill_templates.xml. Kept unnested so themes can override it.
+// Its font style and margins are set inline from the provider settings; without
+// a text color of its own it has the text-muted class.
 .viabill-legal-note {
-    font-weight: 600;
-    margin: 0.5em 0;
+    margin: 0;
+}
+
+// The paragraphs follow the styling set on the legal note box (provider settings).
+.viabill-legal-note p {
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    text-align: inherit;
+    line-height: inherit;
 }
